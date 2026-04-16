@@ -1,60 +1,48 @@
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
-require("dotenv").config(); // .env ფაილისთვის
+require("dotenv").config();
 
 const app = express();
-app.get("/", (req, res) => {
-  res.send("სერვერი მუშაობს!");
-});
 
-
-app.use(cors()); 
-app.options('*', cors());
+// ყველაფრის გამხსნელი CORS
+app.use(cors());
+app.options("*", cors());
 app.use(express.json());
 
+// ტესტ როუტი - რომ დავრწმუნდეთ რომ ეს კოდი მუშაობს
 app.get("/", (req, res) => {
-  res.send("Server is running and CORS is open!");
+  res.send("CORS IS TOTALLY OPEN - V2");
 });
-
-// 1. დაკავშირება MongoDB-სთან
-// პროცესში დაგჭირდება .env ფაილი სადაც ჩაწერ: MONGO_URI=შენი_მისამართი
-const mongoURI =
-  process.env.MONGO_URI ||
-  "mongodb+srv://baqarboboxidze:baqari123BB@cluster0.3ahnxqz.mongodb.net/supraMenu?retryWrites=true&w=majority&appName=Cluster0";
 
 mongoose
-  .connect(mongoURI)
+  .connect(
+    process.env.MONGO_URI ||
+      "mongodb+srv://baqarboboxidze:baqari123BB@cluster0.3ahnxqz.mongodb.net/supraMenu",
+  )
   .then(() => console.log("✅ Connected to MongoDB"))
-  .catch((err) => {
-    console.error("❌ MongoDB connection error details:", err.message);
-    // მნიშვნელოვანია, რომ აქ ლოგი დაგვიწეროს Render-მა
-  });
-// 2. სქემის შექმნა (როგორ გამოიყურება კერძი ბაზაში)
-const dishSchema = new mongoose.Schema({
-  name: String,
-  price: Number,
-  description: String,
-  image: String,
-  inStock: { type: Boolean, default: true },
-  views: { type: Number, default: 0 },
-});
+  .catch((err) => console.error("❌ MongoDB Error:", err));
 
-const Dish = mongoose.model("Dish", dishSchema);
+const Dish = mongoose.model(
+  "Dish",
+  new mongoose.Schema({
+    name: String,
+    price: Number,
+    description: String,
+    image: String,
+    inStock: { type: Boolean, default: true },
+    views: { type: Number, default: 0 },
+  }),
+);
 
-// --- API ენდპოინტები ---
-
-// 1. ყველა კერძის წამოღება
 app.get("/api/menu", async (req, res) => {
   try {
-    const menu = await Dish.find();
-    res.json(menu);
+    res.json(await Dish.find());
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// 2. ახალი კერძის დამატება
 app.post("/api/menu", async (req, res) => {
   try {
     const newItem = new Dish(req.body);
