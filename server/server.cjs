@@ -7,20 +7,21 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:8080",
-  "https://hacker-pshorr777.page.gd",
-  "https://hacker-pshor.netlify.app", // აქ ჩაწერ რასაც Netlify მოგცემს
+  "https://hacker-pshor.netlify.app",
 ];
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      // ნებას რთავს მოთხოვნებს, რომლებიც სიაშია ან არ აქვს origin (მაგ. Postman)
+      // ნებას რთავს მოთხოვნებს origin-ის გარეშე (მაგ. Postman) ან allowedOrigins-დან
       if (!origin || allowedOrigins.indexOf(origin) !== -1) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
       }
     },
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
   }),
 );
 app.use(express.json());
