@@ -145,8 +145,8 @@ const Admin = () => {
     try {
       const isEditing = !!editingItem;
       const url = isEditing
-        ? `https://backend-uiw0.onrender.com/api/menu/${editingItem?._id}`
-        : "https://backend-uiw0.onrender.com/api/menu";
+        ? `https://hacker-pshor.netlify.app/api/menu/${editingItem?._id}`
+        : "https://hacker-pshor.netlify.app/api/menu";
 
       const response = await fetch(url, {
         method: isEditing ? "PATCH" : "POST",
@@ -175,7 +175,7 @@ const Admin = () => {
 
   const executeDelete = async (id: string) => {
     try {
-      const response = await fetch(`https://backend-uiw0.onrender.com/api/menu/${id}`, {
+      const response = await fetch(`https://hacker-pshor.netlify.app/api/menu/${id}`, {
         method: "DELETE",
       });
       if (response.ok) {
@@ -191,7 +191,7 @@ const Admin = () => {
     const newStatus = !item.inStock;
     try {
       const response = await fetch(
-        `https://backend-uiw0.onrender.com:5000/api/menu/${item._id}`,
+        `https://hacker-pshor.netlify.app:5000/api/menu/${item._id}`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },

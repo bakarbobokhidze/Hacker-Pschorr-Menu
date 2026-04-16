@@ -21,7 +21,7 @@ const Index = () => {
 
   // 2. მონაცემების წამოღება ბაზიდან
   useEffect(() => {
-    fetch("https://backend-uiw0.onrender.com/api/menu")
+    fetch("https://hacker-pshor.netlify.app/api/menu")
       .then((res) => res.json())
       .then((data) => setMenuItems(data))
       .catch((err) => console.error("Fetch error:", err));
