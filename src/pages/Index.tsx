@@ -70,7 +70,7 @@ const Index = () => {
             {/* ლოგოს კონტეინერი - მომრგვალებული და მინიმალისტური */}
             <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full border border-border/50 bg-secondary/20 flex items-center justify-center p-1 transition-all group-hover:border-primary/40 group-hover:bg-secondary/40">
               <img
-                src="https://www.hacker-pschorr-shop.de/media/7b/91/52/1724921658/HP_PrimaerLogo_RGB_pos.png?ts=1750923228" // <--- აქ ჩასვი URL (უკეთესია გამჭვირვალე PNG ან SVG)
+                src="/logo.png" // <--- აქ ჩასვი URL (უკეთესია გამჭვირვალე PNG ან SVG)
                 alt="Hacker Pschorr Logo"
                 className="h-full w-full object-contain filter grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300"
                 onError={(e) => {
