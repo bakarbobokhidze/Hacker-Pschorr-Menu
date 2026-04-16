@@ -123,7 +123,7 @@ const Admin = () => {
   const [itemToDelete, setItemToDelete] = useState<MenuItem | null>(null);
 
   const fetchMenu = () => {
-    fetch("http://backend-uiw0.onrender.com/api/menu")
+    fetch("https://backend-uiw0.onrender.com/api/menu")
       .then((res) => res.json())
       .then((data) => setDbItems(data))
       .catch(() => toast.error("მენიუ ვერ ჩაიტვირთა"));
@@ -145,8 +145,8 @@ const Admin = () => {
     try {
       const isEditing = !!editingItem;
       const url = isEditing
-        ? `https://hacker-pshor.netlify.app/api/menu/${editingItem?._id}`
-        : "https://hacker-pshor.netlify.app/api/menu";
+        ? `https://backend-uiw0.onrender.com/api/menu/${editingItem?._id}`
+        : "https://backend-uiw0.onrender.com/api/menu";
 
       const response = await fetch(url, {
         method: isEditing ? "PATCH" : "POST",
