@@ -66,31 +66,45 @@ const Index = () => {
     <div className="min-h-screen bg-background pb-24">
       <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-xl">
         <div className="mx-auto max-w-lg px-4">
-          <div className="flex items-center gap-2 group cursor-pointer">
-            {/* ლოგოს კონტეინერი - მომრგვალებული და მინიმალისტური */}
-            <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full border border-border/50 bg-secondary/20 flex items-center justify-center p-1 transition-all group-hover:border-primary/40 group-hover:bg-secondary/40">
-              <img
-                src="/logo.png" // <--- აქ ჩასვი URL (უკეთესია გამჭვირვალე PNG ან SVG)
-                alt="Hacker Pschorr Logo"
-                className="h-full w-full object-contain filter grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300"
-                onError={(e) => {
-                  e.currentTarget.src = "https://placehold.co/100x100?text=H";
-                }}
-              />
-            </div>
+          <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur shrink-0">
+            <div className="container mx-auto flex h-16 items-center justify-between px-4">
+              {/* მარცხენა მხარე: ლოგო და სახელი */}
+              <div className="flex items-center gap-3 group cursor-pointer">
+                {/* ლოგო - გავზარდეთ ზომა (h-12 w-12) და მოვაშორეთ ზედმეტი ჩარჩოები */}
+                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-white/5 flex items-center justify-center p-1 transition-transform group-hover:scale-105">
+                  <img
+                    src="/your-logo-name.png" // <--- აქ ჩაწერე შენი ფაილის სახელი (მაგ: /logo.png)
+                    alt="Logo"
+                    className="h-full w-full object-contain"
+                  />
+                </div>
 
-            {/* ტექსტის ნაწილი - უფრო ახლოს და კომპაქტურად */}
-            <div className="flex flex-col justify-center -space-y-0.5">
-              {" "}
-              {/* -space-y-0.5 აახლოებს ხაზებს */}
-              <h1 className="font-display text-base font-black leading-none tracking-tight text-foreground/90 group-hover:text-primary transition-colors">
-                Hacker
-              </h1>
-              <p className="text-[8px] uppercase tracking-[0.2em] text-muted-foreground/80 font-bold opacity-80">
-                Pschorr
-              </p>
+                {/* ტექსტი - ზომა გაზრდილია და დაშორება გასწორებული */}
+                <div className="flex flex-col justify-center">
+                  <h1 className="font-display text-xl font-black leading-none tracking-tighter text-foreground uppercase">
+                    Hacker
+                  </h1>
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground font-bold mt-1">
+                    Pschorr
+                  </p>
+                </div>
+              </div>
+
+              {/* მარჯვენა მხარე: აქ უნდა იყოს შენი ადმინის ღილაკი */}
+              <div className="flex items-center gap-4">
+                {/* თუ აქამდე გქონდა Link ან Button ადმინისთვის, დარწმუნდი რომ აქ ზის */}
+                <Link to="/admin">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="font-bold uppercase tracking-wider text-[11px]"
+                  >
+                    Admin Panel
+                  </Button>
+                </Link>
+              </div>
             </div>
-          </div>
+          </nav>
           <div className="pb-3">
             <SearchBar value={search} onChange={setSearch} />
           </div>
