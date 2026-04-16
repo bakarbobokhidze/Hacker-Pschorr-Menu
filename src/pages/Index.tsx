@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useMenu, MenuItem } from "@/contexts/MenuContext";
-import { useLanguage } from "@/contexts/LanguageContext"; // ენა შემოგვაქვს აქედან
+import { useLanguage } from "@/contexts/LanguageContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import CategoryBar from "@/components/CategoryBar";
 import MenuCard from "@/components/MenuCard";
@@ -8,10 +8,8 @@ import SearchBar from "@/components/SearchBar";
 import ItemDetailModal from "@/components/ItemDetailModal";
 import { Settings } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 
 const Index = () => {
-  // 1. გამოიყენე კონტექსტიდან წამოღებული ფუნქციები
   const { incrementViews } = useMenu();
   const { getTranslated, language } = useLanguage();
   const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -20,7 +18,6 @@ const Index = () => {
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
 
-  // 2. მონაცემების წამოღება ბაზიდან
   useEffect(() => {
     fetch("https://backend-uiw0.onrender.com/api/menu")
       .then((res) => res.json())
@@ -28,7 +25,6 @@ const Index = () => {
       .catch((err) => console.error("Fetch error:", err));
   }, []);
 
-  // 3. გაფილტვრა (გამოიყენება კონტექსტის getTranslated)
   const filtered = useMemo(() => {
     return menuItems.filter((item) => {
       const translatedName = getTranslated(item.name) || "";
@@ -43,7 +39,7 @@ const Index = () => {
 
       return matchesCategory && matchesSearch;
     });
-  }, [menuItems, selectedCategory, search, getTranslated, language]); // language დაემატა აქ
+  }, [menuItems, selectedCategory, search, getTranslated, language]);
 
   const sorted = useMemo(() => {
     return [...filtered].sort((a, b) =>
@@ -52,41 +48,52 @@ const Index = () => {
   }, [filtered]);
 
   const handleItemTap = (item: MenuItem) => {
-    // 1. ნახვის მომატება
     const id = item._id || (item as any).id;
     if (id) {
       incrementViews(id);
     }
-
-    // 2. დეტალების ფანჯრის გახსნა
     setSelectedItem(item);
-    setIsDetailOpen(true); // აქ დაემატა "Is" დასაწყისში
+    setIsDetailOpen(true);
   };
 
   return (
     <div className="min-h-screen bg-background pb-24">
       <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-xl">
         <div className="mx-auto max-w-lg px-4">
-          <div className="flex items-center gap-3">
-            {/* მომრგვალებული ლოგო */}
-            <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border border-border bg-white p-1">
-              <img
-                src="/your-logo-name.png" // აქ შენი ფოტოს სახელი ჩაწერე
-                alt="Logo"
-                className="h-full w-full object-contain rounded-full"
-              />
-            </div>
+          <div className="flex items-center justify-between py-3">
+            {" "}
+            {/* დაემატა justify-between და py-3 */}
+            {/* მარცხენა მხარე: ლოგო და სახელი */}
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border border-border bg-white p-1 shadow-sm">
+                <img
+                  src="/logo.png" // <--- აქ ჩაწერე შენი ფაილის სახელი public-იდან
+                  alt="Logo"
+                  className="h-full w-full object-contain rounded-full"
+                />
+              </div>
 
-            {/* შენი ძველი ტექსტის სტილი */}
-            <div>
-              <h1 className="font-display text-xl font-bold text-foreground">
-                Hacker
-              </h1>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                Pschorr
-              </p>
+              <div className="flex flex-col">
+                <h1 className="font-display text-lg font-bold text-foreground leading-tight">
+                  Hacker
+                </h1>
+                <p className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground font-semibold">
+                  Pschorr
+                </p>
+              </div>
+            </div>
+            {/* მარჯვენა მხარე: ენის გადამრთველი და პარამეტრები */}
+            <div className="flex items-center gap-2">
+              <LanguageSwitcher />
+              <Link
+                to="/admin"
+                className="p-2 rounded-full hover:bg-secondary transition-colors text-muted-foreground"
+              >
+                <Settings size={20} />
+              </Link>
             </div>
           </div>
+
           <div className="pb-3">
             <SearchBar value={search} onChange={setSearch} />
           </div>
@@ -109,7 +116,7 @@ const Index = () => {
         </div>
         {sorted.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-            <p className="text-sm">No items found</p>
+            <p className="text-sm font-medium">No items found</p>
           </div>
         )}
       </main>
