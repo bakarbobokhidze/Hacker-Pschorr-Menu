@@ -24,24 +24,29 @@ const allowedOrigins = [
 //     credentials: true,
 //   }),
 // );
-app.use(cors({
-  origin: '*', 
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
-app.options('*', cors());
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
+
 app.use(express.json());
 
 // 1. დაკავშირება MongoDB-სთან
 // პროცესში დაგჭირდება .env ფაილი სადაც ჩაწერ: MONGO_URI=შენი_მისამართი
-mongoose
-  .connect(
-    process.env.MONGO_URI ||
-      "mongodb+srv://baqarboboxidze:baqari123BB@cluster0.3ahnxqz.mongodb.net/?appName=Cluster0",
-  )
-  .then(() => console.log("✅ Connected to MongoDB"))
-  .catch((err) => console.error("❌ MongoDB connection error:", err));
+const mongoURI =
+  process.env.MONGO_URI ||
+  "mongodb+srv://baqarboboxidze:baqari123BB@cluster0.3ahnxqz.mongodb.net/supraMenu?retryWrites=true&w=majority&appName=Cluster0";
 
+mongoose
+  .connect(mongoURI)
+  .then(() => console.log("✅ Connected to MongoDB"))
+  .catch((err) => {
+    console.error("❌ MongoDB connection error details:", err.message);
+    // მნიშვნელოვანია, რომ აქ ლოგი დაგვიწეროს Render-მა
+  });
 // 2. სქემის შექმნა (როგორ გამოიყურება კერძი ბაზაში)
 const dishSchema = new mongoose.Schema({
   name: String,
