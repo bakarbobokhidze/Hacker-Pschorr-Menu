@@ -137,7 +137,7 @@ const Admin = () => {
 
   const handleSaveItem = async (itemData: MenuItem) => {
     // ვალიდაცია
-    if (!itemData.name.ge.trim() || !itemData.name.en.trim()) {
+    if (!itemData.name?.ge?.trim() || !itemData.name?.en?.trim()) {
       toast.error("შეიყვანეთ სახელი ქართულად და ინგლისურად");
       return;
     }
@@ -175,9 +175,12 @@ const Admin = () => {
 
   const executeDelete = async (id: string) => {
     try {
-      const response = await fetch(`https://backend-uiw0.onrender.com/api/menu/${id}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `https://backend-uiw0.onrender.com/api/menu/${id}`,
+        {
+          method: "DELETE",
+        },
+      );
       if (response.ok) {
         setDbItems((prev) => prev.filter((i) => i._id !== id));
         toast.success("წაშლილია");
@@ -496,7 +499,7 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
   };
 
   const handleAddAllergen = () => {
-    const trimmed = newAllergen.trim();
+    const trimmed = newAllergen?.trim(); // დაამატე "?"
     if (trimmed && !form.allergens?.includes(trimmed as any)) {
       setForm({
         ...form,
@@ -506,13 +509,11 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
     }
   };
 
-  const isFormInvalid =
-    !form.name.ge.trim() || !form.name.en.trim() || form.price <= 0;
-
+  const isFormInvalid = !form?.name?.ge?.trim() || !form?.name?.en?.trim();
   return (
     <div className="relative flex flex-col bg-card rounded-2xl border border-border max-h-[85vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-300">
       {/* HEADER */}
-      <div className="px-6 py-4 border-b bg-card/50 backdrop-blur-md z-20 flex justify-between items-center">
+      <div className="px-6 py-4 border-b bg-card/50 backdrop-blur-md z-20 flex justify-between items-center shrink-0">
         <h2 className="font-display text-xl font-bold flex items-center gap-2">
           {item ? (
             <Pencil className="text-primary" size={20} />
@@ -535,332 +536,292 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
         )}
       </div>
 
-      <div className="space-y-4">
-        <h3 className="text-sm font-black uppercase tracking-[0.1em] text-primary/80">
-          ფოტოსურათი
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-          <div className="relative group aspect-video rounded-xl border-2 border-dashed border-border overflow-hidden bg-secondary/20 flex items-center justify-center">
-            {form.image ? (
-              <>
-                <img
-                  src={form.image}
-                  alt="Preview"
-                  className="w-full h-full object-cover transition-transform group-hover:scale-105"
+      {/* SCROLLABLE CONTENT AREA */}
+      <div className="flex-1 overflow-y-auto custom-scrollbar scroll-smooth">
+        <div className="p-6 space-y-8">
+          {" "}
+          {/* მთლიანი შიგთავსის კონტეინერი */}
+          {/* 1. ფოტოსურათის სექცია - მინიმალისტური და სქროლვადი */}
+          <div className="space-y-3">
+            <h3 className="text-[11px] font-black uppercase tracking-wider text-primary/70">
+              ფოტოსურათი
+            </h3>
+            <div className="flex items-center gap-4 bg-secondary/10 p-2.5 rounded-xl border border-border/40">
+              {/* პატარა კვადრატული Preview */}
+              <div className="relative h-16 w-16 shrink-0 rounded-lg border border-border overflow-hidden bg-background group">
+                {form.image ? (
+                  <>
+                    <img
+                      src={form.image}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, image: "" })}
+                      className="absolute inset-0 flex items-center justify-center bg-destructive/80 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X size={14} className="text-white" />
+                    </button>
+                  </>
+                ) : (
+                  <div className="flex items-center justify-center h-full opacity-30">
+                    <Plus size={16} />
+                  </div>
+                )}
+              </div>
+
+              {/* კომპაქტური Input */}
+              <div className="flex-1 space-y-1">
+                <Input
+                  placeholder="ჩასვით ფოტოს ლინკი..."
+                  value={form.image}
+                  onChange={(e) => setForm({ ...form, image: e.target.value })}
+                  className="bg-background border-border/60 h-9 text-xs"
                 />
-                <button
-                  onClick={() => setForm({ ...form, image: "" })}
-                  className="absolute top-2 right-2 p-1.5 bg-destructive rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <X size={14} />
-                </button>
-              </>
-            ) : (
-              <div className="text-center p-4">
-                <div className="mx-auto w-10 h-10 mb-2 rounded-full bg-border flex items-center justify-center">
-                  <Plus className="text-muted-foreground" size={20} />
-                </div>
-                <p className="text-[10px] text-muted-foreground font-bold">
-                  ფოტო არ არის არჩეული
+                <p className="text-[8px] text-muted-foreground px-1 uppercase font-bold opacity-70">
+                  Direct Link (jpg, png, webp)
                 </p>
               </div>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase opacity-60">
-              ფოტოს URL ლინკი
-            </label>
-            <Input
-              placeholder="https://example.com/image.jpg"
-              value={form.image}
-              onChange={(e) => setForm({ ...form, image: e.target.value })}
-              className="bg-background border-border/60"
-            />
-            <p className="text-[9px] text-muted-foreground">
-              * ჩასვით პირდაპირი ლინკი ფოტოზე (jpg, png, webp)
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* SCROLLABLE CONTENT AREA */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar scroll-smooth">
-        {/* LANGUAGES SECTION */}
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-black uppercase tracking-[0.1em] text-primary/80">
-              ინფორმაცია ენების მიხედვით
-            </h3>
-            <div className="h-[1px] flex-1 bg-border ml-4" />
-          </div>
-
-          {(["ge", "en", "de"] as const).map((lang) => (
-            <div
-              key={lang}
-              className="space-y-3 p-4 rounded-2xl bg-secondary/10 border border-border/40 hover:border-primary/30 transition-colors"
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <span className="flex h-6 w-10 items-center justify-center rounded bg-primary text-[10px] font-black uppercase text-primary-foreground">
-                  {lang}
-                </span>
-                <span className="text-xs font-bold text-muted-foreground uppercase">
-                  {lang === "ge"
-                    ? "Georgian"
-                    : lang === "en"
-                      ? "English"
-                      : "German"}
-                </span>
-              </div>
-
-              <div className="space-y-3">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold uppercase opacity-60 ml-1">
-                    დასახელება
-                  </label>
-                  <Input
-                    className="bg-background border-border/60 focus:ring-primary/20"
-                    value={form.name[lang]}
-                    onChange={(e) =>
-                      updateLangField("name", lang, e.target.value)
-                    }
-                    placeholder={`${lang === "ge" ? "მაგ: ხინკალი" : "e.g. Khinkali"}...`}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold uppercase opacity-60 ml-1">
-                    აღწერა
-                  </label>
-                  <Input
-                    className="bg-background/50 border-border/40"
-                    value={form.description[lang]}
-                    onChange={(e) =>
-                      updateLangField("description", lang, e.target.value)
-                    }
-                    placeholder="მოკლე აღწერა..."
-                  />
-                </div>
-              </div>
             </div>
-          ))}
-        </div>
-
-        {/* PRICE & CATEGORY */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-          <div className="space-y-2">
-            <h3 className="text-sm font-black uppercase tracking-[0.1em] text-primary/80">
-              ფასი (₾)
-            </h3>
-            <Input
-              type="number"
-              className="h-12 text-lg font-bold bg-secondary/20 border-none"
-              value={form.price}
-              onChange={(e) =>
-                setForm({ ...form, price: parseFloat(e.target.value) || 0 })
-              }
-            />
           </div>
-          <div className="space-y-2">
-            <h3 className="text-sm font-black uppercase tracking-[0.1em] text-primary/80">
-              კატეგორია
-            </h3>
-            <div className="relative group">
+          {/* 2. LANGUAGES SECTION */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-black uppercase tracking-[0.1em] text-primary/80">
+                ინფორმაცია
+              </h3>
+              <div className="h-[1px] flex-1 bg-border ml-4" />
+            </div>
+
+            {(["ge", "en", "de"] as const).map((lang) => (
+              <div
+                key={lang}
+                className="space-y-3 p-4 rounded-2xl bg-secondary/5 border border-border/40"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded bg-primary text-[9px] font-black uppercase text-primary-foreground">
+                    {lang}
+                  </span>
+                </div>
+                <div className="grid gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase opacity-50 ml-1">
+                      დასახელება
+                    </label>
+                    <Input
+                      className="bg-background"
+                      value={form.name[lang]}
+                      onChange={(e) =>
+                        updateLangField("name", lang, e.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase opacity-50 ml-1">
+                      აღწერა
+                    </label>
+                    <Input
+                      className="bg-background/50"
+                      value={form.description[lang]}
+                      onChange={(e) =>
+                        updateLangField("description", lang, e.target.value)
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* 3. PRICE & CATEGORY */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase opacity-60">
+                ფასი (₾)
+              </label>
+              <Input
+                type="number"
+                className="h-10 font-bold bg-secondary/20"
+                value={form.price}
+                onChange={(e) =>
+                  setForm({ ...form, price: parseFloat(e.target.value) || 0 })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase opacity-60">
+                კატეგორია
+              </label>
               <select
-                className="w-full h-12 rounded-xl border-2 border-border bg-secondary/20 px-4 py-2 text-sm font-bold transition-all appearance-none focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none cursor-pointer"
+                className="w-full h-10 rounded-lg border border-border bg-secondary/20 px-3 text-xs font-bold outline-none"
                 value={form.categoryId}
                 onChange={(e) =>
                   setForm({ ...form, categoryId: e.target.value })
                 }
               >
                 {categories.map((cat: any) => (
-                  <option
-                    key={cat.id}
-                    value={cat.id}
-                    className="bg-card text-foreground py-2"
-                  >
+                  <option key={cat.id} value={cat.id}>
                     {cat.name.ge}
                   </option>
                 ))}
               </select>
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground group-focus-within:text-primary transition-colors">
-                <ChevronDown size={18} />
-              </div>
             </div>
           </div>
-        </div>
-
-        {/* ALLERGENS */}
-        <div className="space-y-4 border-t border-dashed pt-8">
-          <h3 className="text-sm font-black uppercase tracking-[0.1em] text-primary/80">
-            ალერგენები
-          </h3>
-          <div className="flex gap-2">
-            <Input
-              className="bg-background"
-              placeholder="მაგ: თხილი, რძე..."
-              value={newAllergen}
-              onChange={(e) => setNewAllergen(e.target.value)}
-              onKeyDown={(e) =>
-                e.key === "Enter" && (e.preventDefault(), handleAddAllergen())
-              }
-            />
-            <Button
-              type="button"
-              onClick={handleAddAllergen}
-              className="shrink-0"
-            >
-              <Plus size={18} />
-            </Button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {form.allergens?.map((alg, idx) => (
-              <span
-                key={idx}
-                className="group flex items-center gap-2 bg-secondary text-foreground px-3 py-1.5 rounded-lg text-xs font-semibold border border-border"
-              >
-                {alg}
-                <X
-                  size={14}
-                  className="cursor-pointer text-muted-foreground group-hover:text-destructive transition-colors"
-                  onClick={() =>
-                    setForm({
-                      ...form,
-                      allergens: form.allergens.filter((a) => a !== alg),
-                    })
-                  }
-                />
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* PORTIONS */}
-        <div className="space-y-4 border-t border-dashed pt-8 pb-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-sm font-black uppercase tracking-[0.1em] text-primary/80">
-              პორციები / ზომები
-            </h3>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="rounded-full border-primary/30 text-primary hover:bg-primary/10"
-              onClick={() =>
-                setForm({
-                  ...form,
-                  portions: [
-                    ...(form.portions || []),
-                    {
-                      label: { ge: "", en: "", de: "" },
-                      weight: "",
-                      price: form.price,
-                    },
-                  ],
-                })
-              }
-            >
-              <Plus size={14} className="mr-1" /> დამატება
-            </Button>
-          </div>
-
-          {form.portions?.map((portion, idx) => (
-            <div
-              key={idx}
-              className="p-4 border border-border/60 rounded-2xl bg-secondary/5 relative space-y-3 group animate-in slide-in-from-bottom-2"
-            >
+          {/* 4. ALLERGENS */}
+          <div className="space-y-4 pt-4 border-t border-dashed">
+            <label className="text-[10px] font-bold uppercase opacity-60">
+              ალერგენები
+            </label>
+            <div className="flex gap-2">
+              <Input
+                className="h-9 text-xs"
+                placeholder="მაგ: თხილი..."
+                value={newAllergen}
+                onChange={(e) => setNewAllergen(e.target.value)}
+                onKeyDown={(e) =>
+                  e.key === "Enter" && (e.preventDefault(), handleAddAllergen())
+                }
+              />
               <Button
+                type="button"
+                onClick={handleAddAllergen}
+                size="sm"
+                className="h-9 shrink-0"
+              >
+                <Plus size={16} />
+              </Button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {form.allergens?.map((alg, idx) => (
+                <span
+                  key={idx}
+                  className="flex items-center gap-1.5 bg-secondary px-2.5 py-1 rounded-md text-[11px] font-medium border border-border"
+                >
+                  {alg}
+                  <X
+                    size={12}
+                    className="cursor-pointer hover:text-destructive"
+                    onClick={() =>
+                      setForm({
+                        ...form,
+                        allergens: form.allergens.filter((a) => a !== alg),
+                      })
+                    }
+                  />
+                </span>
+              ))}
+            </div>
+          </div>
+          {/* 5. PORTIONS */}
+          <div className="space-y-4 pt-4 border-t border-dashed">
+            <div className="flex justify-between items-center">
+              <label className="text-[10px] font-bold uppercase opacity-60">
+                პორციები
+              </label>
+              <Button
+                type="button"
                 variant="ghost"
-                size="icon"
-                className="absolute right-2 top-2 h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full"
+                size="sm"
+                className="h-7 text-[10px] font-bold text-primary"
                 onClick={() =>
                   setForm({
                     ...form,
-                    portions: form.portions.filter((_, i) => i !== idx),
+                    portions: [
+                      ...(form.portions || []),
+                      {
+                        label: { ge: "", en: "", de: "" },
+                        weight: "",
+                        price: form.price,
+                      },
+                    ],
                   })
                 }
               >
-                <Trash2 size={14} />
+                + დამატება
               </Button>
-
-              <Input
-                className="bg-background"
-                placeholder="პორციის დასახელება (მაგ: დიდი)"
-                value={portion.label.ge}
-                onChange={(e) => {
-                  const p = [...form.portions];
-                  p[idx].label.ge = e.target.value;
-                  setForm({ ...form, portions: p });
-                }}
-              />
-              <div className="grid grid-cols-2 gap-3">
-                <Input
-                  className="bg-background"
-                  placeholder="წონა (გ)"
-                  value={portion.weight}
-                  onChange={(e) => {
-                    const p = [...form.portions];
-                    p[idx].weight = e.target.value;
-                    setForm({ ...form, portions: p });
-                  }}
-                />
-                <Input
-                  className="bg-background font-bold"
-                  type="number"
-                  placeholder="ფასი"
-                  value={portion.price}
-                  onChange={(e) => {
-                    const p = [...form.portions];
-                    p[idx].price = parseFloat(e.target.value);
-                    setForm({ ...form, portions: p });
-                  }}
-                />
-              </div>
             </div>
-          ))}
+            {form.portions?.map((portion, idx) => (
+              <div
+                key={idx}
+                className="p-3 border border-border/40 rounded-xl bg-secondary/5 relative space-y-2"
+              >
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-1 top-1 h-6 w-6 text-muted-foreground hover:text-destructive"
+                  onClick={() =>
+                    setForm({
+                      ...form,
+                      portions: form.portions.filter((_, i) => i !== idx),
+                    })
+                  }
+                >
+                  <Trash2 size={12} />
+                </Button>
+                <Input
+                  className="h-8 text-xs"
+                  placeholder="დასახელება"
+                  value={portion.label.ge}
+                  onChange={(e) => {
+                    const p = [...form.portions];
+                    p[idx].label.ge = e.target.value;
+                    setForm({ ...form, portions: p });
+                  }}
+                />
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    className="h-8 text-xs"
+                    placeholder="წონა"
+                    value={portion.weight}
+                    onChange={(e) => {
+                      const p = [...form.portions];
+                      p[idx].weight = e.target.value;
+                      setForm({ ...form, portions: p });
+                    }}
+                  />
+                  <Input
+                    className="h-8 text-xs font-bold"
+                    type="number"
+                    placeholder="ფასი"
+                    value={portion.price}
+                    onChange={(e) => {
+                      const p = [...form.portions];
+                      p[idx].price = parseFloat(e.target.value);
+                      setForm({ ...form, portions: p });
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* FIXED FOOTER */}
-      <div className="p-6 border-t bg-card/80 backdrop-blur-md z-20 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
-        <div className="flex gap-4">
+      <div className="p-4 border-t bg-card shrink-0">
+        <div className="flex gap-3">
           <Button
             onClick={() => onSave(form)}
-            className="flex-1 h-12 text-base font-black uppercase tracking-wider shadow-lg shadow-primary/25"
+            className="flex-1 h-11 text-sm font-bold uppercase tracking-wider shadow-lg"
             disabled={isFormInvalid}
           >
-            {item ? "ცვლილების შენახვა" : "კერძის დამატება"}
+            {item ? "შენახვა" : "დამატება"}
           </Button>
           <Button
             variant="outline"
             onClick={onCancel}
-            className="flex-1 h-12 text-base font-bold uppercase tracking-wider border-2"
+            className="flex-1 h-11 text-sm font-bold uppercase tracking-wider"
           >
             გაუქმება
           </Button>
         </div>
-        {isFormInvalid && (
-          <p className="text-[10px] text-center mt-3 text-destructive font-bold animate-pulse">
-            * გთხოვთ შეავსოთ მინიმუმ ქართული და ინგლისური დასახელებები და ფასი
-          </p>
-        )}
       </div>
 
-      {/* CUSTOM SCROLLBAR STYLE */}
       <style>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(var(--primary), 0.1);
-          border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(var(--primary), 0.3);
-        }
-      `}</style>
+      .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+      .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+      .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+    `}</style>
     </div>
   );
 };
@@ -959,7 +920,7 @@ const CategoryForm = ({ category, onSave, onCancel }: any) => {
         <Button
           onClick={() => onSave(form)}
           className="flex-1"
-          disabled={!form.name.ge.trim()}
+          disabled={!form.name?.ge?.trim()}
         >
           {t("save")}
         </Button>

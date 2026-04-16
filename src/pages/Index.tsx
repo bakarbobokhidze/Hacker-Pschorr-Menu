@@ -67,12 +67,21 @@ const Index = () => {
       <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-xl">
         <div className="mx-auto max-w-lg px-4">
           <div className="flex items-center justify-between py-3">
+            <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border bg-white p-1.5 shadow-sm">
+              <img
+                src="https://www.hacker-pschorr-shop.de/media/7b/91/52/1724921658/HP_PrimaerLogo_RGB_pos.png?ts=1750923228" // <--- აქ ჩაწერე შენი ლოგოს ფაილის ზუსტი სახელი public საქაღალდიდან
+                alt="Logo"
+                className="h-full w-full object-contain" // object-contain ინარჩუნებს პროპორციებს
+              />
+            </div>
+
+            {/* ტექსტის ნაწილი (შენი ორიგინალი კოდი) */}
             <div>
-              <h1 className="font-display text-xl font-bold text-foreground">
-                Supra
+              <h1 className="font-display text-xl font-bold text-foreground leading-tight">
+                Hacker
               </h1>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                Georgian Kitchen
+              <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground -mt-0.5">
+                Pschorr
               </p>
             </div>
             <div className="flex items-center gap-2">
