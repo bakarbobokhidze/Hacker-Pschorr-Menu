@@ -4,6 +4,9 @@ const mongoose = require("mongoose");
 require("dotenv").config(); // .env ფაილისთვის
 
 const app = express();
+app.get("/", (req, res) => {
+  res.send("სერვერი მუშაობს!");
+});
 
 const allowedOrigins = [
   "http://localhost:8080",
