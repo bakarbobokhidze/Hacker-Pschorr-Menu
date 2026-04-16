@@ -27,15 +27,14 @@ const allowedOrigins = [
 //     credentials: true,
 //   }),
 // );
-app.use(
-  cors({
-    origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  }),
-);
+app.use(cors());
+app.options("*", cors());
 
 app.use(express.json());
+
+app.get("/", (req, res) => {
+  res.send("Server is running and CORS is open!");
+});
 
 // 1. დაკავშირება MongoDB-სთან
 // პროცესში დაგჭირდება .env ფაილი სადაც ჩაწერ: MONGO_URI=შენი_მისამართი
