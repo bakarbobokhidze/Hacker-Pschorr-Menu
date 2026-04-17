@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -6,54 +6,69 @@
 
 @layer base {
   :root {
-    --background: 240 6% 4%;
-    --foreground: 40 10% 92%;
+    /* Hacker-Pschorr მუქი ლურჯი ბაზა */
+    --background: 220 45% 5%;
+    --foreground: 40 10% 95%;
 
-    --card: 240 5% 8%;
-    --card-foreground: 40 10% 92%;
+    /* ბარათები და პოპაპები */
+    --card: 220 40% 8%;
+    --card-foreground: 40 10% 95%;
 
-    --popover: 240 5% 10%;
-    --popover-foreground: 40 10% 92%;
+    --popover: 220 40% 10%;
+    --popover-foreground: 40 10% 95%;
 
-    --primary: 40 52% 58%;
-    --primary-foreground: 240 6% 4%;
+    /* მთავარი ოქროსფერი აქცენტი */
+    --primary: 43 85% 52%;
+    --primary-foreground: 220 45% 5%;
 
-    --secondary: 240 4% 14%;
-    --secondary-foreground: 40 10% 85%;
+    /* მეორადი ლურჯი ელემენტები */
+    --secondary: 220 35% 15%;
+    --secondary-foreground: 40 10% 90%;
 
-    --muted: 240 4% 16%;
-    --muted-foreground: 40 5% 55%;
+    /* მuted ტექსტები */
+    --muted: 220 20% 20%;
+    --muted-foreground: 220 10% 65%;
 
-    --accent: 40 52% 58%;
-    --accent-foreground: 240 6% 4%;
+    /* აქცენტები და ჰოვერები */
+    --accent: 43 85% 52%;
+    --accent-foreground: 220 45% 5%;
 
-    --destructive: 0 72% 51%;
+    /* შეცდომის ფერი - წითელი */
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 4% 18%;
-    --input: 240 4% 18%;
-    --ring: 40 52% 58%;
+    /* ჩარჩოები */
+    --border: 220 30% 18%;
+    --input: 220 30% 18%;
+    --ring: 43 85% 52%;
 
-    --radius: 0.75rem;
+    /* კლასიკური მომრგვალება */
+    --radius: 0.5rem;
 
-    --sidebar-background: 240 5% 6%;
+    /* Sidebar სეთინგი */
+    --sidebar-background: 220 45% 4%;
     --sidebar-foreground: 40 10% 92%;
-    --sidebar-primary: 40 52% 58%;
-    --sidebar-primary-foreground: 240 6% 4%;
-    --sidebar-accent: 240 4% 14%;
-    --sidebar-accent-foreground: 40 10% 85%;
-    --sidebar-border: 240 4% 18%;
-    --sidebar-ring: 40 52% 58%;
+    --sidebar-primary: 43 85% 52%;
+    --sidebar-primary-foreground: 220 45% 5%;
+    --sidebar-accent: 220 35% 15%;
+    --sidebar-accent-foreground: 40 10% 95%;
+    --sidebar-border: 220 30% 18%;
+    --sidebar-ring: 43 85% 52%;
 
-    --gold: 40 52% 58%;
-    --gold-light: 40 60% 70%;
-    --gold-dark: 40 45% 42%;
-    --surface: 240 5% 8%;
-    --surface-elevated: 240 4% 12%;
-    --badge-chef: 40 52% 58%;
-    --badge-spicy: 0 72% 51%;
-    --badge-vegan: 142 50% 45%;
-    --out-of-stock: 240 4% 25%;
+    /* სპეციფიკური ოქროსფერი ვარიაციები */
+    --gold: 43 85% 52%;
+    --gold-light: 43 90% 65%;
+    --gold-dark: 43 80% 35%;
+
+    /* ზედაპირის ფერები */
+    --surface: 220 40% 8%;
+    --surface-elevated: 220 35% 12%;
+
+    /* ბეიჯების ფერები */
+    --badge-chef: 43 85% 52%;
+    --badge-spicy: 0 84% 60%;
+    --badge-vegan: 142 70% 45%;
+    --out-of-stock: 220 15% 30%;
   }
 }
 
@@ -64,10 +79,19 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    /* რბილი გადასვლა ფერების ცვლილებისას */
+    transition: background-color 0.3s ease;
   }
 
-  h1, h2, h3, h4 {
-    font-family: 'Playfair Display', serif;
+  /* სათაურებისთვის ვიყენებთ Playfair Display-ს (როგორც ლოგოზეა) */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Playfair Display", serif;
+    @apply tracking-tight font-semibold;
   }
 }
 
@@ -80,6 +104,7 @@
     display: none;
   }
 
+  /* ოქროსფერი ტექსტის და ფონის კლასები */
   .text-gold {
     color: hsl(var(--gold));
   }
@@ -90,5 +115,14 @@
 
   .border-gold {
     border-color: hsl(var(--gold));
+  }
+
+  /* Hacker-Pschorr სპეციფიკური გრადიენტი (ოქროსფერი ეფექტისთვის) */
+  .bg-gold-gradient {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--gold-light)),
+      hsl(var(--gold-dark))
+    );
   }
 }
