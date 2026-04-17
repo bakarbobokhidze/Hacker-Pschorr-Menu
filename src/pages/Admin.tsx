@@ -648,23 +648,26 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
                 }
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase opacity-60">
+            <div className="space-y-3">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground opacity-70">
                 კატეგორია
               </label>
-              <select
-                className="w-full h-10 rounded-lg border border-border bg-secondary/20 px-3 text-xs font-bold outline-none"
-                value={form.categoryId}
-                onChange={(e) =>
-                  setForm({ ...form, categoryId: e.target.value })
-                }
-              >
+              <div className="grid grid-cols-2 gap-2">
                 {categories.map((cat: any) => (
-                  <option key={cat.id} value={cat.id}>
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => setForm({ ...form, categoryId: cat.id })}
+                    className={`px-3 py-2.5 rounded-xl text-xs font-bold transition-all border ${
+                      form.categoryId === cat.id
+                        ? "border-orange-500 bg-orange-500/20 text-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.2)]"
+                        : "border-white/5 bg-white/5 text-gray-400 hover:bg-white/10 hover:border-white/20"
+                    }`}
+                  >
                     {cat.name.ge}
-                  </option>
+                  </button>
                 ))}
-              </select>
+              </div>
             </div>
           </div>
           {/* 4. ALLERGENS */}
