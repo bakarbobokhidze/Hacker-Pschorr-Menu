@@ -5,6 +5,37 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import {
+  Salad,
+  ChefHat,
+  Flame,
+  Cake,
+  Wine,
+  UtensilsCrossed,
+  Fish,
+  Coffee,
+  Beer,
+  Pizza,
+  Soup,
+  Cookie,
+  Sandwich,
+  Beef,
+  Grape,
+  GlassWater,
+  Wheat,
+  Star,
+  BookOpen,
+  Utensils,
+  Droplets,
+  Pipette,
+  Martini,
+  FlaskConical,
+  TestTube,
+  CupSoda,
+  Torus,
+  CakeSlice,
+  CookingPot,
+} from "lucide-react";
+import {
   X,
   ArrowLeft,
   Plus,
@@ -17,6 +48,32 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+
+const KhinkaliIcon = ({
+  size = 16,
+  className = "",
+}: {
+  size?: number;
+  className?: string;
+}) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M12 2 C12 2, 6 6, 5 12 C4 17, 7 21, 12 21 C17 21, 20 17, 19 12 C18 6, 12 2, 12 2 Z" />
+    <path d="M12 2 C12 2, 9 7, 12 10 C15 7, 12 2, 12 2 Z" />
+    <path d="M12 2 L12 5" />
+    <path d="M9.5 3.5 C9.5 3.5, 8 8, 10 11" />
+    <path d="M14.5 3.5 C14.5 3.5, 16 8, 14 11" />
+  </svg>
+);
 
 const ADMIN_PASSWORD = "admin123";
 
@@ -123,7 +180,7 @@ const Admin = () => {
   const [itemToDelete, setItemToDelete] = useState<MenuItem | null>(null);
 
   const fetchMenu = () => {
-    fetch("https://backend-uiw0.onrender.com/api/menu")
+    fetch("http://localhost:5000/api/menu")
       .then((res) => res.json())
       .then((data) => setDbItems(data))
       .catch(() => toast.error("მენიუ ვერ ჩაიტვირთა"));
@@ -136,6 +193,7 @@ const Admin = () => {
   }, [authenticated]);
 
   const handleSaveItem = async (itemData: MenuItem) => {
+    console.log("RAW JSON:", JSON.stringify(itemData));
     // ვალიდაცია
     if (!itemData.name?.ge?.trim() || !itemData.name?.en?.trim()) {
       toast.error("შეიყვანეთ სახელი ქართულად და ინგლისურად");
@@ -145,8 +203,8 @@ const Admin = () => {
     try {
       const isEditing = !!editingItem;
       const url = isEditing
-        ? `https://backend-uiw0.onrender.com/api/menu/${editingItem?._id}`
-        : "https://backend-uiw0.onrender.com/api/menu";
+        ? `http://localhost:5000/api/menu/${editingItem?._id}`
+        : "http://localhost:5000/api/menu";
 
       const response = await fetch(url, {
         method: isEditing ? "PATCH" : "POST",
@@ -175,12 +233,9 @@ const Admin = () => {
 
   const executeDelete = async (id: string) => {
     try {
-      const response = await fetch(
-        `https://backend-uiw0.onrender.com/api/menu/${id}`,
-        {
-          method: "DELETE",
-        },
-      );
+      const response = await fetch(`http://localhost:5000/api/menu/${id}`, {
+        method: "DELETE",
+      });
       if (response.ok) {
         setDbItems((prev) => prev.filter((i) => i._id !== id));
         toast.success("წაშლილია");
@@ -194,7 +249,7 @@ const Admin = () => {
     const newStatus = !item.inStock;
     try {
       const response = await fetch(
-        `https://backend-uiw0.onrender.com/api/menu/${item._id}`,
+        `http://localhost:5000/api/menu/${item._id}`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -473,8 +528,8 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
     return {
       _id: `item_${Date.now()}`, // აუცილებელია ახალი კერძისთვის
       categoryId: categories[0]?.id || "",
-      name: { en: "", ge: "", de: "" },
-      description: { en: "", ge: "", de: "" },
+      name: { en: "", ge: "", de: "", ru: "" },
+      description: { en: "", ge: "", de: "", ru: "" },
       price: 0,
       image: "",
       badges: [],
@@ -486,20 +541,20 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
 
   const updateLangField = (
     field: "name" | "description",
-    lang: "en" | "ge" | "de",
+    lang: "en" | "ge" | "de" | "ru",
     value: string,
   ) => {
-    setForm((prev) => ({
-      ...prev,
+    setForm({
+      ...form,
       [field]: {
-        ...prev[field],
+        ...form[field],
         [lang]: value,
       },
-    }));
+    });
   };
 
   const handleAddAllergen = () => {
-    const trimmed = newAllergen?.trim(); // დაამატე "?"
+    const trimmed = newAllergen?.trim();
     if (trimmed && !form.allergens?.includes(trimmed as any)) {
       setForm({
         ...form,
@@ -522,18 +577,6 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
           )}
           {item ? "რედაქტირება" : "ახალი კერძის დამატება"}
         </h2>
-        {item && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-destructive hover:bg-destructive/10 font-bold"
-            onClick={() =>
-              confirm("ნამდვილად გსურთ წაშლა?") && onDelete(item._id)
-            }
-          >
-            <Trash2 size={18} className="mr-1" /> წაშლა
-          </Button>
-        )}
       </div>
 
       {/* SCROLLABLE CONTENT AREA */}
@@ -594,7 +637,7 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
               <div className="h-[1px] flex-1 bg-border ml-4" />
             </div>
 
-            {(["ge", "en", "de"] as const).map((lang) => (
+            {(["ge", "en", "ru", "de"] as const).map((lang) => (
               <div
                 key={lang}
                 className="space-y-3 p-4 rounded-2xl bg-secondary/5 border border-border/40"
@@ -611,7 +654,7 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
                     </label>
                     <Input
                       className="bg-background"
-                      value={form.name[lang]}
+                      value={form.name[lang] || ""}
                       onChange={(e) =>
                         updateLangField("name", lang, e.target.value)
                       }
@@ -623,7 +666,7 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
                     </label>
                     <Input
                       className="bg-background/50"
-                      value={form.description[lang]}
+                      value={form.description[lang] || ""}
                       onChange={(e) =>
                         updateLangField("description", lang, e.target.value)
                       }
@@ -732,7 +775,7 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
                     portions: [
                       ...(form.portions || []),
                       {
-                        label: { ge: "", en: "", de: "" },
+                        label: { ge: "", en: "", de: "", ru: "" }, // ✅ სწორია
                         weight: "",
                         price: form.price,
                       },
@@ -763,11 +806,21 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
                 </Button>
                 <Input
                   className="h-8 text-xs"
-                  placeholder="დასახელება"
+                  placeholder="დასახელება (GE)"
                   value={portion.label.ge}
                   onChange={(e) => {
                     const p = [...form.portions];
                     p[idx].label.ge = e.target.value;
+                    setForm({ ...form, portions: p });
+                  }}
+                />
+                <Input
+                  className="h-8 text-xs"
+                  placeholder="Название (RU)"
+                  value={portion.label.ru || ""}
+                  onChange={(e) => {
+                    const p = [...form.portions];
+                    p[idx].label.ru = e.target.value;
                     setForm({ ...form, portions: p });
                   }}
                 />
@@ -804,7 +857,10 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
       <div className="p-4 border-t bg-card shrink-0">
         <div className="flex gap-3">
           <Button
-            onClick={() => onSave(form)}
+            onClick={() => {
+              console.log("saving this data:", form);
+              onSave(form);
+            }}
             className="flex-1 h-11 text-sm font-bold uppercase tracking-wider shadow-lg"
             disabled={isFormInvalid}
           >
@@ -889,26 +945,110 @@ const CategoriesTab = ({
   );
 };
 
+const CATEGORY_ICONS: {
+  value: string;
+  label: string;
+  Icon: React.ElementType;
+}[] = [
+  { value: "Star", label: "სტარტერები", Icon: Star },
+  { value: "BookOpen", label: "მენიუ", Icon: BookOpen },
+  { value: "ChefHat", label: "ძირითადი კერძები", Icon: ChefHat },
+  { value: "Wheat", label: "ცომეული", Icon: Wheat },
+  { value: "Khinkali", label: "ხინკალი", Icon: KhinkaliIcon },
+  { value: "Pizza", label: "პიცა-პასტა", Icon: Pizza },
+  { value: "Salad", label: "სალათები", Icon: Salad },
+  { value: "Soup", label: "წვნიანები", Icon: Soup },
+  { value: "Cake", label: "დესერტი", Icon: CakeSlice },
+  { value: "Coffee", label: "ყავა-ჩაი", Icon: Coffee },
+  { value: "GlassWater", label: "სასმელები", Icon: GlassWater },
+  { value: "CupSoda", label: "უალკოჰოლო", Icon: CupSoda },
+  { value: "Beer", label: "ლუდი", Icon: Beer },
+  { value: "Flame", label: "არაყი-ვისკი", Icon: Flame },
+  { value: "GlassWater", label: "კოქტეილი", Icon: Martini },
+  { value: "Wine", label: "ღვინო", Icon: Wine },
+  { value: "Fish", label: "თევზი", Icon: Fish },
+  { value: "Utensils", label: "მთავარი", Icon: Utensils },
+  { value: "Beef", label: "კერძი", Icon: CookingPot },
+  { value: "Grape", label: "ხილი", Icon: Grape },
+  { value: "torus", label: "სოუსები", Icon: Torus },
+];
+
 const CategoryForm = ({ category, onSave, onCancel }: any) => {
   const { t } = useLanguage();
+  const [iconOpen, setIconOpen] = useState(false);
   const [form, setForm] = useState<Category>(
     category || {
       id: Date.now().toString(),
-      name: { en: "", ge: "", de: "" },
-      icon: "Utensils",
+      name: { en: "", ge: "", de: "", ru: "" },
+      icon: "UtensilsCrossed",
     },
   );
+
+  const SelectedIcon =
+    CATEGORY_ICONS.find((i) => i.value === form.icon)?.Icon || UtensilsCrossed;
+
   return (
     <div className="space-y-4 bg-card p-6 rounded-xl border">
       <h2 className="font-display text-lg font-semibold">
         {category ? t("editItem") : t("addCategory")}
       </h2>
+
       <div className="space-y-2">
-        {(["en", "ge", "de"] as const).map((lang) => (
+        <label className="text-[10px] font-bold uppercase opacity-60">
+          ლოგო
+        </label>
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setIconOpen(!iconOpen)}
+            className="flex items-center gap-3 w-full rounded-lg border border-border bg-secondary/20 px-4 py-2.5 text-left transition-all hover:bg-secondary/40"
+          >
+            <SelectedIcon size={20} className="text-primary" />
+            <span className="flex-1 text-sm font-medium">
+              {CATEGORY_ICONS.find((i) => i.value === form.icon)?.label ||
+                "აირჩიე"}
+            </span>
+            <ChevronDown
+              size={16}
+              className={`opacity-50 transition-transform duration-200 ${iconOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+
+          {iconOpen && (
+            <div className="absolute top-full left-0 right-0 z-50 mt-1 rounded-xl border border-border bg-card shadow-2xl p-2">
+              <div className="grid grid-cols-5 gap-1">
+                {CATEGORY_ICONS.map(({ value, label, Icon }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => {
+                      setForm({ ...form, icon: value });
+                      setIconOpen(false);
+                    }}
+                    className={`flex flex-col items-center gap-1 rounded-lg p-2 text-center transition-all hover:bg-secondary ${
+                      form.icon === value
+                        ? "bg-primary/20 ring-1 ring-primary"
+                        : ""
+                    }`}
+                  >
+                    <Icon size={20} className="text-primary" />
+                    <span className="text-[9px] text-muted-foreground leading-tight">
+                      {label}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        {(["en", "ge", "de", "ru"] as const).map((lang) => (
           <div key={lang} className="flex items-center gap-2">
             <span className="w-8 text-xs font-bold uppercase">{lang}</span>
             <Input
-              value={form.name[lang]}
+              value={form.name[lang] || ""}
               onChange={(e) =>
                 setForm({
                   ...form,
@@ -919,6 +1059,7 @@ const CategoryForm = ({ category, onSave, onCancel }: any) => {
           </div>
         ))}
       </div>
+
       <div className="flex gap-2 pt-2">
         <Button
           onClick={() => onSave(form)}

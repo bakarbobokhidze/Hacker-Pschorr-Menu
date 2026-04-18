@@ -41,21 +41,22 @@ const badgeConfig: Record<
 
 const allergenLabels: Record<
   Allergen,
-  { en: string; ge: string; de: string; emoji: string }
+  { en: string; ge: string; de: string; emoji: string; ru: string }
 > = {
-  gluten: { en: "Gluten", ge: "გლუტენი", de: "Gluten", emoji: "🌾" },
-  dairy: { en: "Dairy", ge: "რძის პროდუქტი", de: "Milch", emoji: "🥛" },
-  nuts: { en: "Nuts", ge: "თხილეული", de: "Nüsse", emoji: "🥜" },
-  eggs: { en: "Eggs", ge: "კვერცხი", de: "Eier", emoji: "🥚" },
-  soy: { en: "Soy", ge: "სოია", de: "Soja", emoji: "🫘" },
+  gluten: { en: "Gluten", ge: "გლუტენი", de: "Gluten", emoji: "🌾", ru: "глютен" },
+  dairy: { en: "Dairy", ge: "რძის პროდუქტი", de: "Milch", emoji: "🥛", ru: "молочный продукт" },
+  nuts: { en: "Nuts", ge: "თხილეული", de: "Nüsse", emoji: "🥜", ru: "Орехи" },
+  eggs: { en: "Eggs", ge: "კვერცხი", de: "Eier", emoji: "🥚", ru: "яйцо" },
+  soy: { en: "Soy", ge: "სოია", de: "Soja", emoji: "🫘", ru: "соя" },
   shellfish: {
     en: "Shellfish",
     ge: "ზღვის პროდუქტი",
     de: "Schalentiere",
+    ru: "",
     emoji: "🦐",
   },
-  fish: { en: "Fish", ge: "თევზი", de: "Fisch", emoji: "🐟" },
-  celery: { en: "Celery", ge: "ნიახური", de: "Sellerie", emoji: "🥬" },
+  fish: { en: "Fish", ge: "თევზი", de: "Fisch", emoji: "🐟", ru: "рыба" },
+  celery: { en: "Celery", ge: "ნიახური", de: "Sellerie", emoji: "🥬", ru: "Сельдерей" },
 };
 
 interface ItemDetailModalProps {
