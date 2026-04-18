@@ -8,16 +8,7 @@ import React, {
 
 export type Badge = "chef" | "spicy" | "vegan" | "new";
 
-export type Allergen =
-  | "gluten"
-  | "dairy"
-  | "nuts"
-  | "eggs"
-  | "soy"
-  | "shellfish"
-  | "fish"
-  | "celery"
-  | string;
+export type Allergen = string;
 
 export interface PortionSize {
   label: { en: string; ge: string; de: string; ru: string };
