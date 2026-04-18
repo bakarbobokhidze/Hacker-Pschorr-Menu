@@ -180,7 +180,7 @@ const Admin = () => {
   const [itemToDelete, setItemToDelete] = useState<MenuItem | null>(null);
 
   const fetchMenu = () => {
-    fetch("https://backend-uiw0.onrender.com")
+    fetch("https://backend-uiw0.onrender.com/api/menu")
       .then((res) => res.json())
       .then((data) => setDbItems(data))
       .catch(() => toast.error("მენიუ ვერ ჩაიტვირთა"));
@@ -233,9 +233,12 @@ const Admin = () => {
 
   const executeDelete = async (id: string) => {
     try {
-      const response = await fetch(`https://backend-uiw0.onrender.com/api/menu/${id}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `https://backend-uiw0.onrender.com/api/menu/${id}`,
+        {
+          method: "DELETE",
+        },
+      );
       if (response.ok) {
         setDbItems((prev) => prev.filter((i) => i._id !== id));
         toast.success("წაშლილია");
