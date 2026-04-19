@@ -195,7 +195,7 @@ const ItemDetailModal = ({ item, onClose }: ItemDetailModalProps) => {
                     {item.allergens.map((allergen, idx) => (
                       <span
                         key={idx}
-                        className="flex items-center gap-1.5 rounded-full border border-border bg-secondary px-3 py-1.5 text-xs font-medium text-red-500"
+                        className="flex items-center gap-1.5 rounded-full border border-border bg-secondary px-3 py-1.5 text-xs font-medium text-foreground"
                       >
                         <span>⚠️</span>
                         {getTranslated(allergen)}
