@@ -195,14 +195,13 @@ const ItemDetailModal = ({ item, onClose }: ItemDetailModalProps) => {
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {item.allergens.map((allergen, idx) => (
+                      console.log(`Allergen at index ${idx}:`, allergen);
                       <span
                         key={idx}
                         className="flex items-center gap-1.5 rounded-full border border-border bg-secondary px-3 py-1.5 text-xs font-medium text-foreground"
                       >
                         <span>⚠️</span>
-                        {typeof allergen === 'string' 
-                          ? allergen 
-                          : (allergen.ge || allergen.en || JSON.stringify(allergen))}
+                        {typeof allergen === 'string' ? `"${allergen}"` : JSON.stringify(allergen)}
                       </span>
                     ))}
                   </div>
