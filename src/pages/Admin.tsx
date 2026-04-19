@@ -750,13 +750,13 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
                   <X
                     size={12}
                     className="cursor-pointer hover:text-destructive"
-                    onClick={() =>
+                    onClick={() => {
                       console.log("allergens:", JSON.stringify(form.allergens));
                       setForm({
                         ...form,
                         allergens: form.allergens.filter((a) => a !== alg),
-                      })
-                    }
+                      });
+                    }}
                   />
                 </span>
               ))}
