@@ -56,11 +56,19 @@ const Index = () => {
     );
   }, [filtered]);
 
-  const handleItemTap = (item: MenuItem) => {
+  const handleItemTap = async (item: MenuItem) => {
     const id = item._id || (item as any).id;
     if (id) incrementViews(id);
-    setSelectedItem(item);
-    setIsDetailOpen(true);
+  
+    try {
+      const res = await fetch(`https://backend-uiw0.onrender.com/api/menu`);
+      const fresh = await res.json();
+      const freshItem = fresh.find((i: MenuItem) => i._id === id) || item;
+      setSelectedItem(freshItem);
+      setMenuItems(fresh);
+    } catch {
+      setSelectedItem(item);
+    }
   };
 
   // --- LOADING SCREEN ---
