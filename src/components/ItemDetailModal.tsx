@@ -198,10 +198,10 @@ const ItemDetailModal = ({ item, onClose }: ItemDetailModalProps) => {
                       console.log(`Allergen at index ${idx}:`, allergen);
                       <span
                         key={idx}
-                        className="flex items-center gap-1.5 rounded-full border border-border bg-secondary px-3 py-1.5 text-xs font-medium text-foreground"
+                        className="flex items-center gap-1.5 rounded-full border border-border bg-secondary px-3 py-1.5 text-xs font-medium text-red-500"
                       >
                         <span>⚠️</span>
-                        {typeof allergen === 'string' ? `"${allergen}"` : JSON.stringify(allergen)}
+                        {getTranslated(allergen)}
                       </span>
                     ))}
                   </div>
