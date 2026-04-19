@@ -201,9 +201,9 @@ const Admin = () => {
     }
 
     try {
-      const isEditing = !!editingItem;
+      const isEditing = itemData._id && !itemData._id.startsWith("item_");
       const url = isEditing
-        ? `https://backend-uiw0.onrender.com/api/menu/${editingItem?._id}`
+        ? `https://backend-uiw0.onrender.com/api/menu/${itemData._id}`
         : "https://backend-uiw0.onrender.com/api/menu";
 
       const response = await fetch(url, {
