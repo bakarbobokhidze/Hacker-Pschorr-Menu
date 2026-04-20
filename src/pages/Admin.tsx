@@ -752,38 +752,38 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
           </div>
           {/* 4. ALLERGENS */}
           <div className="space-y-4 pt-4 border-t border-dashed">
-            <label className="text-[10px] font-bold uppercase opacity-60">
-              ალერგენები
-            </label>
+            <div className="flex justify-between items-center">
+              <label className="text-[10px] font-bold uppercase opacity-60">
+                ალერგენები (რედაქტირებადი)
+              </label>
+            </div>
           
-            {/* დამატებული ალერგენების სია რედაქტირების ფუნქციით */}
-            <div className="grid gap-3">
-              {form.allergens?.map((alg, idx) => (
+            {/* უკვე დამატებული ალერგენების სია */}
+            <div className="space-y-3">
+              {form.allergens?.map((alg: any, idx: number) => (
                 <div 
                   key={idx} 
-                  className="relative p-3 rounded-lg border border-border bg-secondary/30 space-y-2 group"
+                  className="p-3 rounded-xl border border-border/60 bg-secondary/20 relative group animate-in slide-in-from-left-2"
                 >
-                  {/* წაშლის ღილაკი */}
+                  {/* წაშლის ღილაკი - მთლიანი ჯგუფისთვის */}
                   <button
                     type="button"
-                    onClick={() =>
-                      setForm({
-                        ...form,
-                        allergens: form.allergens.filter((_, i) => i !== idx),
-                      })
-                    }
-                    className="absolute -right-2 -top-2 h-6 w-6 rounded-full bg-destructive text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-10"
+                    onClick={() => {
+                      const filtered = form.allergens.filter((_: any, i: number) => i !== idx);
+                      setForm({ ...form, allergens: filtered });
+                    }}
+                    className="absolute -right-2 -top-2 h-6 w-6 rounded-full bg-destructive text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md z-10"
                   >
                     <X size={12} />
                   </button>
           
-                  {/* 4 ენის ინპუტი თითოეული ალერგენისთვის */}
-                  <div className="grid grid-cols-2 gap-2">
+                  {/* ინდივიდუალური ენების ინპუტები */}
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                     {(["ge", "en", "de", "ru"] as const).map((lang) => (
-                      <div key={lang} className="flex items-center gap-1">
-                        <span className="text-[9px] font-bold uppercase opacity-40 w-4">{lang}</span>
+                      <div key={lang} className="flex items-center gap-2">
+                        <span className="text-[9px] font-black uppercase opacity-30 w-4">{lang}</span>
                         <Input
-                          className="h-7 text-[11px] bg-background"
+                          className="h-7 text-[11px] bg-background/50 border-none focus-visible:ring-1"
                           value={alg[lang] || ""}
                           onChange={(e) => {
                             const updatedAllergens = [...form.allergens];
@@ -793,7 +793,7 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
                             };
                             setForm({ ...form, allergens: updatedAllergens });
                           }}
-                          placeholder="..."
+                          placeholder="ჩაწერეთ..."
                         />
                       </div>
                     ))}
@@ -802,15 +802,15 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
               ))}
             </div>
           
-            {/* ახალი ალერგენის დასამატებელი ფორმა */}
-            <div className="pt-2 border-t border-dashed border-border mt-4">
-              <p className="text-[10px] font-bold mb-2 opacity-50 text-center">ახალი ალერგენის დამატება</p>
-              <div className="grid grid-cols-2 gap-2 mb-2">
+            {/* ახალი ალერგენის დამატება - ცარიელი ბლოკი */}
+            <div className="mt-4 p-4 rounded-xl border border-dashed border-primary/30 bg-primary/5">
+              <p className="text-[10px] font-bold mb-3 opacity-60 uppercase text-center">ახალი ალერგენის ჯგუფი</p>
+              <div className="grid grid-cols-2 gap-2">
                 {(["ge", "en", "de", "ru"] as const).map((lang) => (
                   <Input
                     key={lang}
-                    className="h-8 text-xs"
-                    placeholder={lang.toUpperCase()}
+                    className="h-8 text-xs bg-background"
+                    placeholder={`${lang.toUpperCase()} დასახელება`}
                     value={newAllergen[lang]}
                     onChange={(e) => setNewAllergen({ ...newAllergen, [lang]: e.target.value })}
                   />
@@ -821,109 +821,12 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
                 onClick={handleAddAllergen}
                 variant="outline"
                 size="sm"
-                className="w-full h-8 border-dashed"
+                className="w-full h-9 mt-3 border-primary/20 hover:bg-primary/10"
               >
-                <Plus size={14} className="mr-1" /> დამატება
+                <Plus size={14} className="mr-2" /> ჯგუფის დამატება
               </Button>
             </div>
           </div>
-          
-          {/* 5. PORTIONS */}
-          <div className="space-y-4 pt-4 border-t border-dashed">
-            <div className="flex justify-between items-center">
-              <label className="text-[10px] font-bold uppercase opacity-60">
-                პორციები
-              </label>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-7 text-[10px] font-bold text-primary"
-                onClick={() =>
-                  setForm({
-                    ...form,
-                    portions: [
-                      ...(form.portions || []),
-                      {
-                        label: { ge: "", en: "", de: "", ru: "" },
-                        weight: "",
-                        price: form.price,
-                      },
-                    ],
-                  })
-                }
-              >
-                + დამატება
-              </Button>
-            </div>
-            
-            {form.portions?.map((portion, idx) => (
-              <div
-                key={idx}
-                className="p-3 border border-border/40 rounded-xl bg-secondary/5 relative space-y-2"
-              >
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-1 top-1 h-6 w-6 text-muted-foreground hover:text-destructive"
-                  onClick={() =>
-                    setForm({
-                      ...form,
-                      portions: form.portions.filter((_, i) => i !== idx),
-                    })
-                  }
-                >
-                  <Trash2 size={12} />
-                </Button>
-          
-                {/* პორციის დასახელებები ენების მიხედვით */}
-                <div className="grid grid-cols-2 gap-2">
-                  {(["ge", "en", "de", "ru"] as const).map((lang) => (
-                    <div key={lang} className="flex items-center gap-1">
-                       <span className="text-[8px] font-bold uppercase opacity-30 w-3">{lang}</span>
-                       <Input
-                         className="h-8 text-xs"
-                         placeholder={`პორცია (${lang.toUpperCase()})`}
-                         value={portion.label[lang] || ""}
-                         onChange={(e) => {
-                           const p = [...form.portions];
-                           p[idx].label[lang] = e.target.value;
-                           setForm({ ...form, portions: p });
-                         }}
-                       />
-                    </div>
-                  ))}
-                </div>
-          
-                <div className="grid grid-cols-2 gap-2">
-                  <Input
-                    className="h-8 text-xs"
-                    placeholder="წონა"
-                    value={portion.weight}
-                    onChange={(e) => {
-                      const p = [...form.portions];
-                      p[idx].weight = e.target.value;
-                      setForm({ ...form, portions: p });
-                    }}
-                  />
-                  <Input
-                    className="h-8 text-xs font-bold"
-                    type="number"
-                    placeholder="ფასი"
-                    value={portion.price}
-                    onChange={(e) => {
-                      const p = [...form.portions];
-                      p[idx].price = parseFloat(e.target.value);
-                      setForm({ ...form, portions: p });
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
       {/* FIXED FOOTER */}
       <div className="p-4 border-t bg-card shrink-0">
         <div className="flex gap-3">
