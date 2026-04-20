@@ -561,7 +561,7 @@ const ItemsTab = ({
 /* --- ITEM FORM COMPONENT --- */
 const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
   const { t } = useLanguage();
-  const [newAllergen, setNewAllergen] = useState("");
+  const [newAllergen, setNewAllergen] = useState({ ge: "", en: "", de: "", ru: "" });
 
   const [form, setForm] = useState<MenuItem>(() => {
     if (item) return item;
@@ -593,17 +593,12 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
   };
 
   const handleAddAllergen = () => {
-    const trimmed = newAllergen?.trim();
-    if (!trimmed) return;
-    
-    setForm((prev) => {
-      if (prev.allergens?.includes(trimmed as any)) return prev;
-      return {
-        ...prev,
-        allergens: [...(prev.allergens || []), trimmed as any],
-      };
-    });
-    setNewAllergen("");
+    if (!newAllergen.ge.trim()) return;
+    setForm((prev) => ({
+      ...prev,
+      allergens: [...(prev.allergens || []), newAllergen],
+    }));
+    setNewAllergen({ ge: "", en: "", de: "", ru: "" });
   };
 
   const isFormInvalid = !form?.name?.ge?.trim() || !form?.name?.en?.trim();
@@ -760,41 +755,43 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
             <label className="text-[10px] font-bold uppercase opacity-60">
               ალერგენები
             </label>
-            <div className="flex gap-2">
-              <Input
-                className="h-9 text-xs"
-                placeholder="მაგ: თხილი..."
-                value={newAllergen}
-                onChange={(e) => setNewAllergen(e.target.value)}
-                onKeyDown={(e) =>
-                  e.key === "Enter" && (e.preventDefault(), handleAddAllergen())
-                }
-              />
-              <Button
-                type="button"
-                onClick={handleAddAllergen}
-                size="sm"
-                className="h-9 shrink-0"
-              >
-                <Plus size={16} />
-              </Button>
+            <div className="grid grid-cols-2 gap-2">
+              {(["ge", "en", "de", "ru"] as const).map((lang) => (
+                <Input
+                  key={lang}
+                  className="h-8 text-xs"
+                  placeholder={lang.toUpperCase()}
+                  value={newAllergen[lang]}
+                  onChange={(e) =>
+                    setNewAllergen({ ...newAllergen, [lang]: e.target.value })
+                  }
+                />
+              ))}
             </div>
+            <Button
+              type="button"
+              onClick={handleAddAllergen}
+              size="sm"
+              className="h-8 w-full"
+            >
+              <Plus size={14} className="mr-1" /> დამატება
+            </Button>
             <div className="flex flex-wrap gap-2">
               {form.allergens?.map((alg, idx) => (
                 <span
                   key={idx}
                   className="flex items-center gap-1.5 bg-secondary px-2.5 py-1 rounded-md text-[11px] font-medium border border-border"
                 >
-                  {alg}
+                  {alg.ge}
                   <X
                     size={12}
                     className="cursor-pointer hover:text-destructive"
-                    onClick={() => {
+                    onClick={() =>
                       setForm({
                         ...form,
-                        allergens: form.allergens.filter((a) => a !== alg),
-                      });
-                    }}
+                        allergens: form.allergens.filter((_, i) => i !== idx),
+                      })
+                    }
                   />
                 </span>
               ))}
