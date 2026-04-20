@@ -619,15 +619,12 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
       {/* SCROLLABLE CONTENT AREA */}
       <div className="flex-1 overflow-y-auto custom-scrollbar scroll-smooth">
         <div className="p-6 space-y-8">
-          {" "}
-          {/* მთლიანი შიგთავსის კონტეინერი */}
-          {/* 1. ფოტოსურათის სექცია - მინიმალისტური და სქროლვადი */}
+          {/* 1. PHOTO SECTION */}
           <div className="space-y-3">
             <h3 className="text-[11px] font-black uppercase tracking-wider text-primary/70">
               ფოტოსურათი
             </h3>
             <div className="flex items-center gap-4 bg-secondary/10 p-2.5 rounded-xl border border-border/40">
-              {/* პატარა კვადრატული Preview */}
               <div className="relative h-16 w-16 shrink-0 rounded-lg border border-border overflow-hidden bg-background group">
                 {form.image ? (
                   <>
@@ -651,7 +648,6 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
                 )}
               </div>
 
-              {/* კომპაქტური Input */}
               <div className="flex-1 space-y-1">
                 <Input
                   placeholder="ჩასვით ფოტოს ლინკი..."
@@ -665,6 +661,7 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
               </div>
             </div>
           </div>
+
           {/* 2. LANGUAGES SECTION */}
           <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -713,6 +710,7 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
               </div>
             ))}
           </div>
+
           {/* 3. PRICE & CATEGORY */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -750,6 +748,7 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
               </div>
             </div>
           </div>
+
           {/* 4. ALLERGENS */}
           <div className="space-y-4 pt-4 border-t border-dashed">
             <div className="flex justify-between items-center">
@@ -757,15 +756,13 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
                 ალერგენები (რედაქტირებადი)
               </label>
             </div>
-          
-            {/* უკვე დამატებული ალერგენების სია */}
+            
             <div className="space-y-3">
               {form.allergens?.map((alg: any, idx: number) => (
                 <div 
                   key={idx} 
-                  className="p-3 rounded-xl border border-border/60 bg-secondary/20 relative group animate-in slide-in-from-left-2"
+                  className="p-3 rounded-xl border border-border/60 bg-secondary/20 relative group"
                 >
-                  {/* წაშლის ღილაკი - მთლიანი ჯგუფისთვის */}
                   <button
                     type="button"
                     onClick={() => {
@@ -777,7 +774,6 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
                     <X size={12} />
                   </button>
           
-                  {/* ინდივიდუალური ენების ინპუტები */}
                   <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                     {(["ge", "en", "de", "ru"] as const).map((lang) => (
                       <div key={lang} className="flex items-center gap-2">
@@ -787,10 +783,7 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
                           value={alg[lang] || ""}
                           onChange={(e) => {
                             const updatedAllergens = [...form.allergens];
-                            updatedAllergens[idx] = { 
-                              ...updatedAllergens[idx], 
-                              [lang]: e.target.value 
-                            };
+                            updatedAllergens[idx] = { ...updatedAllergens[idx], [lang]: e.target.value };
                             setForm({ ...form, allergens: updatedAllergens });
                           }}
                           placeholder="ჩაწერეთ..."
@@ -802,7 +795,6 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
               ))}
             </div>
           
-            {/* ახალი ალერგენის დამატება - ცარიელი ბლოკი */}
             <div className="mt-4 p-4 rounded-xl border border-dashed border-primary/30 bg-primary/5">
               <p className="text-[10px] font-bold mb-3 opacity-60 uppercase text-center">ახალი ალერგენის ჯგუფი</p>
               <div className="grid grid-cols-2 gap-2">
@@ -810,7 +802,7 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
                   <Input
                     key={lang}
                     className="h-8 text-xs bg-background"
-                    placeholder={`${lang.toUpperCase()} დასახელება`}
+                    placeholder={`${lang.toUpperCase()}`}
                     value={newAllergen[lang]}
                     onChange={(e) => setNewAllergen({ ...newAllergen, [lang]: e.target.value })}
                   />
@@ -821,21 +813,21 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
                 onClick={handleAddAllergen}
                 variant="outline"
                 size="sm"
-                className="w-full h-9 mt-3 border-primary/20 hover:bg-primary/10"
+                className="w-full h-9 mt-3"
               >
                 <Plus size={14} className="mr-2" /> ჯგუფის დამატება
               </Button>
             </div>
           </div>
+        </div> 
+      </div> 
+
       {/* FIXED FOOTER */}
       <div className="p-4 border-t bg-card shrink-0">
         <div className="flex gap-3">
           <Button
-            onClick={() => {
-              console.log("saving this data:", form);
-              onSave(form);
-            }}
-            className="flex-1 h-11 text-sm font-bold uppercase tracking-wider shadow-lg"
+            onClick={() => onSave(form)}
+            className="flex-1 h-11 text-sm font-bold uppercase tracking-wider"
             disabled={isFormInvalid}
           >
             {item ? "შენახვა" : "დამატება"}
@@ -851,10 +843,10 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
       </div>
 
       <style>{`
-      .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-      .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-      .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
-    `}</style>
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+      `}</style>
     </div>
   );
 };
