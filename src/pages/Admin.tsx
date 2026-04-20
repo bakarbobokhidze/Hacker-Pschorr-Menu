@@ -755,52 +755,79 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
             <label className="text-[10px] font-bold uppercase opacity-60">
               ალერგენები
             </label>
-            <div className="grid grid-cols-2 gap-2">
-              {(["ge", "en", "de", "ru"] as const).map((lang) => (
-                <Input
-                  key={lang}
-                  className="h-8 text-xs"
-                  placeholder={lang.toUpperCase()}
-                  value={newAllergen[lang]}
-                  onChange={(e) =>
-                    setNewAllergen({ ...newAllergen, [lang]: e.target.value })
-                  }
-                />
-              ))}
-            </div>
-            <Button
-              type="button"
-              onClick={handleAddAllergen}
-              size="sm"
-              className="h-8 w-full"
-            >
-              <Plus size={14} className="mr-1" /> დამატება
-            </Button>
-           <div className="flex flex-wrap gap-2">
-            {form.allergens?.map((alg, idx) => (
-              <span
-                key={idx}
-                className="flex flex-col items-start bg-secondary px-2.5 py-1 rounded-md text-[11px] font-medium border border-border"
-              >
-                <div className="flex items-center justify-between w-full gap-2">
-                  <span className="text-primary font-bold">GE: {alg.ge}</span>
-                  <X
-                    size={12}
-                    className="cursor-pointer hover:text-destructive"
+          
+            {/* დამატებული ალერგენების სია რედაქტირების ფუნქციით */}
+            <div className="grid gap-3">
+              {form.allergens?.map((alg, idx) => (
+                <div 
+                  key={idx} 
+                  className="relative p-3 rounded-lg border border-border bg-secondary/30 space-y-2 group"
+                >
+                  {/* წაშლის ღილაკი */}
+                  <button
+                    type="button"
                     onClick={() =>
                       setForm({
                         ...form,
                         allergens: form.allergens.filter((_, i) => i !== idx),
                       })
                     }
-                  />
+                    className="absolute -right-2 -top-2 h-6 w-6 rounded-full bg-destructive text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-10"
+                  >
+                    <X size={12} />
+                  </button>
+          
+                  {/* 4 ენის ინპუტი თითოეული ალერგენისთვის */}
+                  <div className="grid grid-cols-2 gap-2">
+                    {(["ge", "en", "de", "ru"] as const).map((lang) => (
+                      <div key={lang} className="flex items-center gap-1">
+                        <span className="text-[9px] font-bold uppercase opacity-40 w-4">{lang}</span>
+                        <Input
+                          className="h-7 text-[11px] bg-background"
+                          value={alg[lang] || ""}
+                          onChange={(e) => {
+                            const updatedAllergens = [...form.allergens];
+                            updatedAllergens[idx] = { 
+                              ...updatedAllergens[idx], 
+                              [lang]: e.target.value 
+                            };
+                            setForm({ ...form, allergens: updatedAllergens });
+                          }}
+                          placeholder="..."
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                {/* დაამატე ესენი, რომ შეამოწმო Frontend-ზე თუ შემოდის მონაცემი */}
-                <span className="opacity-70 text-[9px]">EN: {alg.en} | DE: {alg.de} | RU: {alg.ru}</span>
-              </span>
-            ))}
+              ))}
+            </div>
+          
+            {/* ახალი ალერგენის დასამატებელი ფორმა */}
+            <div className="pt-2 border-t border-dashed border-border mt-4">
+              <p className="text-[10px] font-bold mb-2 opacity-50 text-center">ახალი ალერგენის დამატება</p>
+              <div className="grid grid-cols-2 gap-2 mb-2">
+                {(["ge", "en", "de", "ru"] as const).map((lang) => (
+                  <Input
+                    key={lang}
+                    className="h-8 text-xs"
+                    placeholder={lang.toUpperCase()}
+                    value={newAllergen[lang]}
+                    onChange={(e) => setNewAllergen({ ...newAllergen, [lang]: e.target.value })}
+                  />
+                ))}
+              </div>
+              <Button
+                type="button"
+                onClick={handleAddAllergen}
+                variant="outline"
+                size="sm"
+                className="w-full h-8 border-dashed"
+              >
+                <Plus size={14} className="mr-1" /> დამატება
+              </Button>
+            </div>
           </div>
-          </div>
+          
           {/* 5. PORTIONS */}
           <div className="space-y-4 pt-4 border-t border-dashed">
             <div className="flex justify-between items-center">
@@ -818,7 +845,7 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
                     portions: [
                       ...(form.portions || []),
                       {
-                        label: { ge: "", en: "", de: "", ru: "" }, // ✅ სწორია
+                        label: { ge: "", en: "", de: "", ru: "" },
                         weight: "",
                         price: form.price,
                       },
@@ -829,6 +856,7 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
                 + დამატება
               </Button>
             </div>
+            
             {form.portions?.map((portion, idx) => (
               <div
                 key={idx}
@@ -847,26 +875,26 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
                 >
                   <Trash2 size={12} />
                 </Button>
-                <Input
-                  className="h-8 text-xs"
-                  placeholder="დასახელება (GE)"
-                  value={portion.label.ge}
-                  onChange={(e) => {
-                    const p = [...form.portions];
-                    p[idx].label.ge = e.target.value;
-                    setForm({ ...form, portions: p });
-                  }}
-                />
-                <Input
-                  className="h-8 text-xs"
-                  placeholder="Название (RU)"
-                  value={portion.label.ru || ""}
-                  onChange={(e) => {
-                    const p = [...form.portions];
-                    p[idx].label.ru = e.target.value;
-                    setForm({ ...form, portions: p });
-                  }}
-                />
+          
+                {/* პორციის დასახელებები ენების მიხედვით */}
+                <div className="grid grid-cols-2 gap-2">
+                  {(["ge", "en", "de", "ru"] as const).map((lang) => (
+                    <div key={lang} className="flex items-center gap-1">
+                       <span className="text-[8px] font-bold uppercase opacity-30 w-3">{lang}</span>
+                       <Input
+                         className="h-8 text-xs"
+                         placeholder={`პორცია (${lang.toUpperCase()})`}
+                         value={portion.label[lang] || ""}
+                         onChange={(e) => {
+                           const p = [...form.portions];
+                           p[idx].label[lang] = e.target.value;
+                           setForm({ ...form, portions: p });
+                         }}
+                       />
+                    </div>
+                  ))}
+                </div>
+          
                 <div className="grid grid-cols-2 gap-2">
                   <Input
                     className="h-8 text-xs"
@@ -893,8 +921,6 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
               </div>
             ))}
           </div>
-        </div>
-      </div>
 
       {/* FIXED FOOTER */}
       <div className="p-4 border-t bg-card shrink-0">
