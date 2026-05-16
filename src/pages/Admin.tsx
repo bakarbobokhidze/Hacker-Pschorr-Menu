@@ -34,6 +34,7 @@ import {
   Torus,
   CakeSlice,
   CookingPot,
+  MessageSquare, // ახალი იკონი შეფასებებისთვის
 } from "lucide-react";
 import {
   X,
@@ -161,7 +162,8 @@ const DeleteConfirmModal = ({ isOpen, onConfirm, onCancel, itemName }: any) => {
   );
 };
 
-type Tab = "items" | "categories" | "analytics";
+// დავამატეთ "reviews" ახალ თაბად
+type Tab = "items" | "categories" | "analytics" | "reviews";
 
 /* --- MAIN ADMIN COMPONENT --- */
 const Admin = () => {
@@ -176,8 +178,12 @@ const Admin = () => {
   const [showCatForm, setShowCatForm] = useState(false);
   const [dbItems, setDbItems] = useState<MenuItem[]>([]);
 
+  // ახალი სთეითი შეფასებების შესანახად
+  const [reviews, setReviews] = useState<any[]>([]);
+
   // წაშლის მოდალისთვის
   const [itemToDelete, setItemToDelete] = useState<MenuItem | null>(null);
+  const [reviewToDelete, setReviewToDelete] = useState<any | null>(null);
 
   const fetchMenu = () => {
     fetch("https://backend-uiw0.onrender.com/api/menu")
@@ -186,87 +192,63 @@ const Admin = () => {
       .catch(() => toast.error("მენიუ ვერ ჩაიტვირთა"));
   };
 
+  // ფუნქცია შეფასებების წამოსაღებად
+  const fetchReviews = () => {
+    fetch("https://backend-uiw0.onrender.com/api/reviews")
+      .then((res) => res.json())
+      .then((data) => setReviews(data))
+      .catch(() => console.log("შეფასებები ვერ ჩაიტვირთა"));
+  };
+
   useEffect(() => {
     if (authenticated) {
       fetchMenu();
+      fetchReviews(); // ავტომატურად ტვირთავს როცა ავტორიზაციას გაივლის
     }
   }, [authenticated]);
 
-  const handleSaveItem = async (itemData: MenuItem) => {
-    // 1. მონაცემების მომზადება (სუფთა ობიექტის შექმნა)
-    // თუ ID იწყება "item_"-ით, საერთოდ ვაშორებთ მას, რომ ბაზამ ახალი შექმნას
-    const isNew = !itemData._id || itemData._id.startsWith("item_");
-    
-    const payload = { ...itemData };
-    if (isNew) {
-      delete payload._id; // ახალი კერძის შემთხვევაში ვაშლით დროებით ID-ს
+  // ხელახალი ჩატვირთვა თაბების გადართვისას (სინქრონულობისთვის)
+  useEffect(() => {
+    if (authenticated && tab === "reviews") {
+      fetchReviews();
     }
-  
-    // 2. ვალიდაცია
-    if (!payload.name?.ge?.trim() || !payload.name?.en?.trim()) {
+  }, [tab, authenticated]);
+
+  const handleSaveItem = async (itemData: MenuItem) => {
+    console.log("RAW JSON:", JSON.stringify(itemData));
+    if (!itemData.name?.ge?.trim() || !itemData.name?.en?.trim()) {
       toast.error("შეიყვანეთ სახელი ქართულად და ინგლისურად");
       return;
     }
-  
+
     try {
-      const url = !isNew
-        ? `https://backend-uiw0.onrender.com/api/menu/${payload._id}`
+      const isEditing = !!editingItem;
+      const url = isEditing
+        ? `https://backend-uiw0.onrender.com/api/menu/${editingItem?._id}`
         : "https://backend-uiw0.onrender.com/api/menu";
-  
+
       const response = await fetch(url, {
-        method: !isNew ? "PATCH" : "POST",
+        method: isEditing ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(itemData),
       });
-  
+
       if (response.ok) {
         const saved = await response.json();
-        
-        if (!isNew) {
-          // რედაქტირება: ვპოულობთ ძველს და ვანაცვლებთ ზუსტად იმავე ადგილას
+        if (isEditing) {
           setDbItems((prev) =>
-            prev.map((i) => (i._id === saved._id ? saved : i))
+            prev.map((i) => (i._id === saved._id ? saved : i)),
           );
-          toast.success("განახლდა წარმატებით");
+          toast.success("განახლდა");
         } else {
-          // დამატება: უბრალოდ ვამატებთ მასივის ბოლოში
           setDbItems((prev) => [...prev, saved]);
-          toast.success("დაემატა წარმატებით");
+          toast.success("დაემატა");
         }
-  
         setShowItemForm(false);
         setEditingItem(null);
-      } else {
-        const errorData = await response.json();
-        toast.error(errorData.message || "სერვერმა მოთხოვნა არ მიიღო");
       }
     } catch (error) {
-      console.error("Save error:", error);
       toast.error("შეცდომა შენახვისას");
-    }
-  };
-
-  const handleQuickPriceUpdate = async (item: MenuItem, newPrice: number) => {
-    // 1. ვამზადებთ მონაცემს
-    const updatedItem = { ...item, price: newPrice };
-  
-    try {
-      // 2. პირდაპირ სერვერზე გაგზავნა (PATCH)
-      const response = await fetch(`https://backend-uiw0.onrender.com/api/menu/${item._id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedItem),
-      });
-  
-      if (response.ok) {
-        const saved = await response.json();
-        // 3. მხოლოდ State-ის განახლება, ფორმების შეხების გარეშე
-        setDbItems((prev) =>
-          prev.map((i) => (i._id === item._id ? saved : i))
-        );
-      }
-    } catch (error) {
-      console.error("Quick price update failed:", error);
     }
   };
 
@@ -274,9 +256,7 @@ const Admin = () => {
     try {
       const response = await fetch(
         `https://backend-uiw0.onrender.com/api/menu/${id}`,
-        {
-          method: "DELETE",
-        },
+        { method: "DELETE" },
       );
       if (response.ok) {
         setDbItems((prev) => prev.filter((i) => i._id !== id));
@@ -284,6 +264,22 @@ const Admin = () => {
       }
     } catch (error) {
       toast.error("წაშლა ვერ მოხერხდა");
+    }
+  };
+
+  // ფუნქცია კომენტარის რეალური წაშლისთვის ბაზიდან
+  const executeDeleteReview = async (id: string) => {
+    try {
+      const response = await fetch(
+        `https://backend-uiw0.onrender.com/api/reviews/${id}`,
+        { method: "DELETE" },
+      );
+      if (response.ok) {
+        setReviews((prev) => prev.filter((r) => r._id !== id));
+        toast.success("შეფასება წაშლილია");
+      }
+    } catch (error) {
+      toast.error("შეფასების წაშლა ვერ მოხერხდა");
     }
   };
 
@@ -340,26 +336,25 @@ const Admin = () => {
             <LogOut size={16} className="mr-2" /> {t("logout")}
           </Button>
         </div>
-        <div className="mx-auto max-w-2xl px-4 flex gap-1 pb-2">
-          {(["items", "categories", "analytics"] as Tab[]).map((tb) => (
-            <button
-              key={tb}
-              onClick={() => setTab(tb)}
-              className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-                tab === tb
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {t(
-                tb === "items"
-                  ? "menuItems"
-                  : tb === "categories"
-                    ? "categories"
-                    : "analytics",
-              )}
-            </button>
-          ))}
+        <div className="mx-auto max-w-2xl px-4 flex gap-1 pb-2 overflow-x-auto no-scrollbar">
+          {(["items", "categories", "analytics", "reviews"] as Tab[]).map(
+            (tb) => (
+              <button
+                key={tb}
+                onClick={() => setTab(tb)}
+                className={`rounded-lg px-4 py-2 text-sm font-medium transition-all shrink-0 ${
+                  tab === tb
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {tb === "items" && t("menuItems")}
+                {tb === "categories" && t("categories")}
+                {tb === "analytics" && t("analytics")}
+                {tb === "reviews" && "შეფასებები"}
+              </button>
+            ),
+          )}
         </div>
       </header>
 
@@ -380,7 +375,9 @@ const Admin = () => {
               setItemToDelete(dbItems.find((i) => i._id === id) || null)
             }
             onToggleStock={handleToggleStock}
-            onPriceUpdate={handleQuickPriceUpdate}
+            onPriceUpdate={(item: MenuItem, price: number) =>
+              handleSaveItem({ ...item, price })
+            }
             showForm={showItemForm}
             editingItem={editingItem}
             onSave={handleSaveItem}
@@ -443,8 +440,56 @@ const Admin = () => {
             ))}
           </div>
         )}
+
+        {/* --- ახალი სექცია: შეფასებების გამოჩენა --- */}
+        {tab === "reviews" && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="font-display text-lg font-semibold flex items-center gap-2">
+                <MessageSquare size={20} className="text-primary" />
+                მომხმარებელთა შეფასებები
+              </h2>
+              <span className="text-xs bg-secondary px-2 py-1 rounded-md text-muted-foreground font-bold">
+                სულ: {reviews.length}
+              </span>
+            </div>
+
+            {reviews.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground text-sm border border-dashed rounded-xl">
+                შეფასებები ჯერ არ არის დატოვებული.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {reviews.map((rev) => (
+                  <div
+                    key={rev._id}
+                    className="flex items-start justify-between gap-4 rounded-xl border border-border bg-card p-4 transition-all hover:border-border/80"
+                  >
+                    <div className="flex-1 min-w-0 space-y-2">
+                      <p className="text-sm font-medium text-foreground whitespace-pre-line leading-relaxed">
+                        {rev.text}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
+                        {new Date(rev.createdAt).toLocaleString("ka-GE")}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0"
+                      onClick={() => setReviewToDelete(rev)}
+                    >
+                      <Trash2 size={14} />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </main>
 
+      {/* კერძების წაშლის მოდალი */}
       <DeleteConfirmModal
         isOpen={!!itemToDelete}
         itemName={getTranslated(itemToDelete?.name || { ge: "" })}
@@ -453,6 +498,23 @@ const Admin = () => {
           if (itemToDelete) {
             executeDelete(itemToDelete._id!);
             setItemToDelete(null);
+          }
+        }}
+      />
+
+      {/* შეფასებების წაშლის მოდალი */}
+      <DeleteConfirmModal
+        isOpen={!!reviewToDelete}
+        itemName={
+          reviewToDelete?.text
+            ? reviewToDelete.text.substring(0, 25) + "..."
+            : "შეფასება"
+        }
+        onCancel={() => setReviewToDelete(null)}
+        onConfirm={() => {
+          if (reviewToDelete) {
+            executeDeleteReview(reviewToDelete._id);
+            setReviewToDelete(null);
           }
         }}
       />
@@ -561,11 +623,12 @@ const ItemsTab = ({
 /* --- ITEM FORM COMPONENT --- */
 const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
   const { t } = useLanguage();
-  const [newAllergen, setNewAllergen] = useState({ ge: "", en: "", de: "", ru: "" });
+  const [newAllergen, setNewAllergen] = useState("");
 
   const [form, setForm] = useState<MenuItem>(() => {
     if (item) return item;
     return {
+      _id: `item_${Date.now()}`,
       categoryId: categories[0]?.id || "",
       name: { en: "", ge: "", de: "", ru: "" },
       description: { en: "", ge: "", de: "", ru: "" },
@@ -593,12 +656,14 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
   };
 
   const handleAddAllergen = () => {
-    if (!newAllergen.ge.trim()) return;
-    setForm((prev) => ({
-      ...prev,
-      allergens: [...(prev.allergens || []), newAllergen],
-    }));
-    setNewAllergen({ ge: "", en: "", de: "", ru: "" });
+    const trimmed = newAllergen?.trim();
+    if (trimmed && !form.allergens?.includes(trimmed as any)) {
+      setForm({
+        ...form,
+        allergens: [...(form.allergens || []), trimmed as any],
+      });
+      setNewAllergen("");
+    }
   };
 
   const isFormInvalid = !form?.name?.ge?.trim() || !form?.name?.en?.trim();
@@ -619,7 +684,6 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
       {/* SCROLLABLE CONTENT AREA */}
       <div className="flex-1 overflow-y-auto custom-scrollbar scroll-smooth">
         <div className="p-6 space-y-8">
-          {/* 1. PHOTO SECTION */}
           <div className="space-y-3">
             <h3 className="text-[11px] font-black uppercase tracking-wider text-primary/70">
               ფოტოსურათი
@@ -662,7 +726,7 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
             </div>
           </div>
 
-          {/* 2. LANGUAGES SECTION */}
+          {/* LANGUAGES SECTION */}
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-black uppercase tracking-[0.1em] text-primary/80">
@@ -711,7 +775,7 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
             ))}
           </div>
 
-          {/* 3. PRICE & CATEGORY */}
+          {/* PRICE & CATEGORY */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-[10px] font-bold uppercase opacity-60">
@@ -749,85 +813,156 @@ const ItemForm = ({ item, categories, onSave, onCancel, onDelete }: any) => {
             </div>
           </div>
 
-          {/* 4. ALLERGENS */}
+          {/* ALLERGENS */}
           <div className="space-y-4 pt-4 border-t border-dashed">
-            <div className="flex justify-between items-center">
-              <label className="text-[10px] font-bold uppercase opacity-60">
-                ალერგენები (რედაქტირებადი)
-              </label>
-            </div>
-            
-            <div className="space-y-3">
-              {form.allergens?.map((alg: any, idx: number) => (
-                <div 
-                  key={idx} 
-                  className="p-3 rounded-xl border border-border/60 bg-secondary/20 relative group"
-                >
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const filtered = form.allergens.filter((_: any, i: number) => i !== idx);
-                      setForm({ ...form, allergens: filtered });
-                    }}
-                    className="absolute -right-2 -top-2 h-6 w-6 rounded-full bg-destructive text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md z-10"
-                  >
-                    <X size={12} />
-                  </button>
-          
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                    {(["ge", "en", "de", "ru"] as const).map((lang) => (
-                      <div key={lang} className="flex items-center gap-2">
-                        <span className="text-[9px] font-black uppercase opacity-30 w-4">{lang}</span>
-                        <Input
-                          className="h-7 text-[11px] bg-background/50 border-none focus-visible:ring-1"
-                          value={alg[lang] || ""}
-                          onChange={(e) => {
-                            const updatedAllergens = [...form.allergens];
-                            updatedAllergens[idx] = { ...updatedAllergens[idx], [lang]: e.target.value };
-                            setForm({ ...form, allergens: updatedAllergens });
-                          }}
-                          placeholder="ჩაწერეთ..."
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          
-            <div className="mt-4 p-4 rounded-xl border border-dashed border-primary/30 bg-primary/5">
-              <p className="text-[10px] font-bold mb-3 opacity-60 uppercase text-center">ახალი ალერგენის ჯგუფი</p>
-              <div className="grid grid-cols-2 gap-2">
-                {(["ge", "en", "de", "ru"] as const).map((lang) => (
-                  <Input
-                    key={lang}
-                    className="h-8 text-xs bg-background"
-                    placeholder={`${lang.toUpperCase()}`}
-                    value={newAllergen[lang]}
-                    onChange={(e) => setNewAllergen({ ...newAllergen, [lang]: e.target.value })}
-                  />
-                ))}
-              </div>
+            <label className="text-[10px] font-bold uppercase opacity-60">
+              ალერგენები
+            </label>
+            <div className="flex gap-2">
+              <Input
+                className="h-9 text-xs"
+                placeholder="მაგ: თხილი..."
+                value={newAllergen}
+                onChange={(e) => setNewAllergen(e.target.value)}
+                onKeyDown={(e) =>
+                  e.key === "Enter" && (e.preventDefault(), handleAddAllergen())
+                }
+              />
               <Button
                 type="button"
                 onClick={handleAddAllergen}
-                variant="outline"
                 size="sm"
-                className="w-full h-9 mt-3"
+                className="h-9 shrink-0"
               >
-                <Plus size={14} className="mr-2" /> ჯგუფის დამატება
+                <Plus size={16} />
               </Button>
             </div>
+            <div className="flex flex-wrap gap-2">
+              {form.allergens?.map((alg, idx) => (
+                <span
+                  key={idx}
+                  className="flex items-center gap-1.5 bg-secondary px-2.5 py-1 rounded-md text-[11px] font-medium border border-border"
+                >
+                  {alg}
+                  <X
+                    size={12}
+                    className="cursor-pointer hover:text-destructive"
+                    onClick={() =>
+                      setForm({
+                        ...form,
+                        allergens: form.allergens.filter((a) => a !== alg),
+                      })
+                    }
+                  />
+                </span>
+              ))}
+            </div>
           </div>
-        </div> 
-      </div> 
+
+          {/* PORTIONS */}
+          <div className="space-y-4 pt-4 border-t border-dashed">
+            <div className="flex justify-between items-center">
+              <label className="text-[10px] font-bold uppercase opacity-60">
+                პორციები
+              </label>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 text-[10px] font-bold text-primary"
+                onClick={() =>
+                  setForm({
+                    ...form,
+                    portions: [
+                      ...(form.portions || []),
+                      {
+                        label: { ge: "", en: "", de: "", ru: "" },
+                        weight: "",
+                        price: form.price,
+                      },
+                    ],
+                  })
+                }
+              >
+                + დამატება
+              </Button>
+            </div>
+            {form.portions?.map((portion, idx) => (
+              <div
+                key={idx}
+                className="p-3 border border-border/40 rounded-xl bg-secondary/5 relative space-y-2"
+              >
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-1 top-1 h-6 w-6 text-muted-foreground hover:text-destructive"
+                  onClick={() =>
+                    setForm({
+                      ...form,
+                      portions: form.portions.filter((_, i) => i !== idx),
+                    })
+                  }
+                >
+                  <Trash2 size={12} />
+                </Button>
+                <Input
+                  className="h-8 text-xs"
+                  placeholder="დასახელება (GE)"
+                  value={portion.label.ge}
+                  onChange={(e) => {
+                    const p = [...form.portions];
+                    p[idx].label.ge = e.target.value;
+                    setForm({ ...form, portions: p });
+                  }}
+                />
+                <Input
+                  className="h-8 text-xs"
+                  placeholder="Название (RU)"
+                  value={portion.label.ru || ""}
+                  onChange={(e) => {
+                    const p = [...form.portions];
+                    p[idx].label.ru = e.target.value;
+                    setForm({ ...form, portions: p });
+                  }}
+                />
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    className="h-8 text-xs"
+                    placeholder="წონა"
+                    value={portion.weight}
+                    onChange={(e) => {
+                      const p = [...form.portions];
+                      p[idx].weight = e.target.value;
+                      setForm({ ...form, portions: p });
+                    }}
+                  />
+                  <Input
+                    className="h-8 text-xs font-bold"
+                    type="number"
+                    placeholder="ფასი"
+                    value={portion.price}
+                    onChange={(e) => {
+                      const p = [...form.portions];
+                      p[idx].price = parseFloat(e.target.value);
+                      setForm({ ...form, portions: p });
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
       {/* FIXED FOOTER */}
       <div className="p-4 border-t bg-card shrink-0">
         <div className="flex gap-3">
           <Button
-            onClick={() => onSave(form)}
-            className="flex-1 h-11 text-sm font-bold uppercase tracking-wider"
+            onClick={() => {
+              console.log("saving this data:", form);
+              onSave(form);
+            }}
+            className="flex-1 h-11 text-sm font-bold uppercase tracking-wider shadow-lg"
             disabled={isFormInvalid}
           >
             {item ? "შენახვა" : "დამატება"}
@@ -920,23 +1055,23 @@ const CATEGORY_ICONS: {
   { value: "BookOpen", label: "მენიუ", Icon: BookOpen },
   { value: "ChefHat", label: "ძირითადი კერძები", Icon: ChefHat },
   { value: "Wheat", label: "ცომეული", Icon: Wheat },
-  { value: "KhinkaliIcon", label: "ხინკალი", Icon: KhinkaliIcon },
+  { value: "Khinkali", label: "ხინკალი", Icon: KhinkaliIcon },
   { value: "Pizza", label: "პიცა-პასტა", Icon: Pizza },
   { value: "Salad", label: "სალათები", Icon: Salad },
   { value: "Soup", label: "წვნიანები", Icon: Soup },
-  { value: "CakeSlice", label: "დესერტი", Icon: CakeSlice },
+  { value: "Cake", label: "დესერტი", Icon: CakeSlice },
   { value: "Coffee", label: "ყავა-ჩაი", Icon: Coffee },
   { value: "GlassWater", label: "სასმელები", Icon: GlassWater },
   { value: "CupSoda", label: "უალკოჰოლო", Icon: CupSoda },
   { value: "Beer", label: "ლუდი", Icon: Beer },
   { value: "Flame", label: "არაყი-ვისკი", Icon: Flame },
-  { value: "Martini", label: "კოქტეილი", Icon: Martini },
+  { value: "GlassWater", label: "კოქტეილი", Icon: Martini },
   { value: "Wine", label: "ღვინო", Icon: Wine },
   { value: "Fish", label: "თევზი", Icon: Fish },
   { value: "Utensils", label: "მთავარი", Icon: Utensils },
-  { value: "CookingPot", label: "კერძი", Icon: CookingPot },
+  { value: "Beef", label: "კერძი", Icon: CookingPot },
   { value: "Grape", label: "ხილი", Icon: Grape },
-  { value: "Torus", label: "სოუსები", Icon: Torus },
+  { value: "torus", label: "სოუსები", Icon: Torus },
 ];
 
 const CategoryForm = ({ category, onSave, onCancel }: any) => {
