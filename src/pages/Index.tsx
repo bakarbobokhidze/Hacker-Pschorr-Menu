@@ -9,6 +9,7 @@ import ItemDetailModal from "@/components/ItemDetailModal";
 import { Settings } from "lucide-react";
 import { Link } from "react-router-dom";
 import "../../src/index.css";
+import ReviewBubble from "@/components/Review.Bubble";
 
 const Index = () => {
   const { incrementViews } = useMenu();
@@ -56,19 +57,11 @@ const Index = () => {
     );
   }, [filtered]);
 
-  const handleItemTap = async (item: MenuItem) => {
+  const handleItemTap = (item: MenuItem) => {
     const id = item._id || (item as any).id;
     if (id) incrementViews(id);
-  
-    try {
-      const res = await fetch(`https://backend-uiw0.onrender.com/api/menu`);
-      const fresh = await res.json();
-      const freshItem = fresh.find((i: MenuItem) => i._id === id) || item;
-      setSelectedItem(freshItem);
-      setMenuItems(fresh);
-    } catch {
-      setSelectedItem(item);
-    }
+    setSelectedItem(item);
+    setIsDetailOpen(true);
   };
 
   // --- LOADING SCREEN ---
@@ -181,6 +174,7 @@ const Index = () => {
           onClose={() => setSelectedItem(null)}
         />
       )}
+      <ReviewBubble />
     </div>
   );
 };
