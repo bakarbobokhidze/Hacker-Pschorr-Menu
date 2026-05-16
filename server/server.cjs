@@ -13,10 +13,7 @@ app.get("/", (req, res) => {
 });
 
 mongoose
-  .connect(
-    process.env.MONGO_URI ||
-      "mongodb+srv://baqarboboxidze:baqari123BB@cluster0.3ahnxqz.mongodb.net/supraMenu",
-  )
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ Connected to MongoDB"))
   .catch((err) => console.error("❌ MongoDB Error:", err));
 
@@ -96,12 +93,17 @@ app.post("/api/menu", async (req, res) => {
 
 app.patch("/api/menu/:id", async (req, res) => {
   try {
-    const { _id, ...data } = req.body;
+    const { _id, __v, ...data } = req.body;
     const flatData = {};
     for (const [key, value] of Object.entries(data)) {
-      if (value && typeof value === "object" && !Array.isArray(value)) {
+      if (
+        value !== null &&
+        value !== undefined &&
+        typeof value === "object" &&
+        !Array.isArray(value)
+      ) {
         for (const [subKey, subValue] of Object.entries(value)) {
-          flatData[`${key}.${subKey}`] = subValue;
+          flatData[`${key}.${subKey}`] = subValue ?? "";
         }
       } else {
         flatData[key] = value;
@@ -110,11 +112,11 @@ app.patch("/api/menu/:id", async (req, res) => {
     const updatedDish = await Dish.findByIdAndUpdate(
       req.params.id,
       { $set: flatData },
-      { new: true },
+      { returnDocument: "after" },
     );
     res.json(updatedDish);
   } catch (err) {
-    res.status(404).json({ message: "კერძი ვერ მოიძებნა" });
+    res.status(500).json({ message: err.message });
   }
 });
 
@@ -179,6 +181,43 @@ app.delete("/api/categories/:id", async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     res.status(404).json({ success: false });
+  }
+});
+
+const ReviewSchema = new mongoose.Schema({
+  text: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now },
+});
+const Review = mongoose.models.Review || mongoose.model("Review", ReviewSchema);
+
+app.post("/api/reviews", async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text || text.trim() === "") {
+      return res.status(400).json({ error: "ტექსტი ცარიელია" });
+    }
+    const newReview = await Review.create({ text });
+    res.status(201).json({ success: true, data: newReview });
+  } catch (error) {
+    res.status(500).json({ error: "სერვერის შეცდომა" });
+  }
+});
+
+app.get("/api/reviews", async (req, res) => {
+  try {
+    const reviews = await Review.find({}).sort({ createdAt: -1 });
+    res.json(reviews);
+  } catch (error) {
+    res.status(500).json({ error: "სერვერის შეცდომა" });
+  }
+});
+
+app.delete("/api/reviews/:id", async (req, res) => {
+  try {
+    await Review.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: "წაიშალა წარმატებით" });
+  } catch (error) {
+    res.status(500).json({ error: "ვერ წაიშალა" });
   }
 });
 
